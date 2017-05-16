@@ -5,7 +5,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.kenneth.examproject.Models.Event;
@@ -19,9 +18,9 @@ import java.util.List;
 
 public class WeekListAdapter extends BaseAdapter {
 
-    Context context;
-    List<Event> events;
-    Event event = null;
+    private Context context;
+    private List<Event> events;
+    private Event event = null;
 
     public WeekListAdapter(Context c, List<Event> taskList){
         events = taskList;
@@ -63,10 +62,10 @@ public class WeekListAdapter extends BaseAdapter {
         if(event !=null) {
 
             TextView nameView = (TextView) convertView.findViewById(R.id.eventNameTV);
-            nameView.setText(event.getName().toString());
+            nameView.setText(event.getName());
 
             TextView dateView = (TextView) convertView.findViewById(R.id.eventDateTV);
-            dateView.setText(event.getStartTime().toString());
+            dateView.setText(event.getStartTime());
         }
         return convertView;
     }
