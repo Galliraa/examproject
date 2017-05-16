@@ -11,14 +11,18 @@ import android.widget.TextView;
 
 import com.example.kenneth.examproject.Interfaces.EventSelectorInterface;
 import com.example.kenneth.examproject.Models.Event;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.MapView;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.SupportMapFragment;
 
 import java.lang.reflect.Field;
 
 /**
 
  */
-public class DetailsFragment extends Fragment {
+public class DetailsFragment extends Fragment implements OnMapReadyCallback{
 
     private TextView nameTV;
     private TextView dateTV;
@@ -26,7 +30,8 @@ public class DetailsFragment extends Fragment {
     private TextView addressTV;
     private TextView descTV;
     private ImageView eventIV;
-    private MapView eventMV;
+
+    private GoogleMap eMap;
 
     private EventSelectorInterface eventSelector;
 
@@ -45,8 +50,9 @@ public class DetailsFragment extends Fragment {
         addressTV = (TextView) view.findViewById(R.id.eventAddressTV);
         descTV = (TextView) view.findViewById(R.id.eventDescTV);
         eventIV = (ImageView) view.findViewById(R.id.eventIV);
-        eventMV = (MapView) view.findViewById(R.id.eventMV);
        // updateEvents();
+        setUpMap();
+
         return view;
     }
 
@@ -98,6 +104,22 @@ public class DetailsFragment extends Fragment {
             throw new RuntimeException(e);
         } catch (IllegalAccessException e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public void onMapReady(GoogleMap googleMap) {
+        eMap = googleMap;
+        // Check if we were successful in obtaining the map.
+        if (eMap != null) {
+        }
+
+    }
+
+    public void setUpMap(){
+        if (eMap == null){
+            ((SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.MapFragment))
+                    .getMapAsync(this);
         }
     }
 }
