@@ -6,11 +6,27 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.LinearLayout;
 
+import com.example.kenneth.examproject.Interfaces.EventSelectorInterface;
 import com.example.kenneth.examproject.Models.Event;
 
 import java.util.ArrayList;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements EventSelectorInterface{
+
+    @Override
+    public void onEventSelected(int position) {
+
+    }
+
+    @Override
+    public ArrayList<Event> getEventList() {
+        return null;
+    }
+
+    @Override
+    public Event getCurrentSelection() {
+        return null;
+    }
 
     public enum PhoneMode {PORTRAIT, LANDSCAPE}
     public enum UserMode {WEEK_VIEW, MONTH_VIEW, DAY_VIEW, DETAILS_VIEW}

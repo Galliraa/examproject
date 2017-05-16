@@ -46,7 +46,7 @@ public class DetailsFragment extends Fragment {
         descTV = (TextView) view.findViewById(R.id.eventDescTV);
         eventIV = (ImageView) view.findViewById(R.id.eventIV);
         eventMV = (MapView) view.findViewById(R.id.eventMV);
-        updateEvents();
+       // updateEvents();
         return view;
     }
 
