@@ -8,7 +8,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
-import android.widget.TextView;
 
 import com.example.kenneth.examproject.Adapters.DayListAdapter;
 import com.example.kenneth.examproject.Interfaces.EventSelectorInterface;
@@ -19,6 +18,7 @@ import java.util.ArrayList;
 
 public class DayFragment extends Fragment {
 
+    private int lolleren;
     private ListView eventListView;
     private DayListAdapter dayListAdapter;
     private ArrayList<Event> events;
