@@ -1,5 +1,7 @@
 package com.example.kenneth.examproject;
 
+//rimelig nice forsøg
+
 import android.content.res.Configuration;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
