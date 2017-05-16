@@ -1,0 +1,80 @@
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" >
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.example.kenneth.examproject.DetailsFragment">
+
+    <!-- TODO: Update blank fragment layout -->
+
+    <ImageView
+        android:id="@+id/eventIV"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:srcCompat="@android:drawable/ic_menu_report_image"
+        android:layout_weight="0.27"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
+
+    <TextView
+        android:id="@+id/eventNameTV"
+        android:layout_toLeftOf="@+id/eventDateTV"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/eventIV"
+        android:text="TextView" />
+
+    <TextView
+        android:id="@+id/eventDateTV"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="TextView"
+        android:layout_alignBaseline="@+id/eventNameTV"
+        android:layout_alignBottom="@+id/eventNameTV"
+        android:layout_toLeftOf="@+id/eventTimeTV"
+        android:layout_toStartOf="@+id/eventTimeTV" />
+
+    <TextView
+        android:id="@+id/eventTimeTV"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="TextView"
+        android:layout_alignBaseline="@+id/eventDateTV"
+        android:layout_alignBottom="@+id/eventDateTV"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true" />
+
+    <TextView
+        android:id="@+id/eventDescTV"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="TextView"
+        android:layout_below="@+id/eventNameTV"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
+
+    <TextView
+        android:id="@+id/eventAddressTV"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/eventDescTV"
+        android:layout_toStartOf="@+id/eventDateTV"
+        android:text="TextView"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:layout_toLeftOf="@+id/eventDateTV" />
+
+    <com.google.android.gms.maps.MapView
+        android:id="@+id/eventMV"
+        android:layout_width="200dp"
+        android:layout_height="200dp"
+        android:layout_below="@+id/eventAddressTV"
+        android:layout_centerHorizontal="true" />
+
+</RelativeLayout>
+</ScrollView>

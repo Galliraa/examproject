@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <TextView
+        android:id="@+id/eventDateTV"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="8dp"
+        android:layout_marginTop="8dp"
+        android:text="TextView"
+        android:textAlignment="center"
+        android:textSize="30sp"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/eventNameTV"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignEnd="@+id/eventDateTV"
+        android:layout_alignLeft="@+id/eventDateTV"
+        android:layout_alignRight="@+id/eventDateTV"
+        android:layout_alignStart="@+id/eventDateTV"
+        android:layout_below="@+id/eventDateTV"
+        android:text="TextView"
+        android:textAlignment="center"
+        app:layout_constraintLeft_toLeftOf="@+id/eventDateTV"
+        app:layout_constraintRight_toRightOf="@+id/eventDateTV"
+        app:layout_constraintTop_toBottomOf="@+id/eventDateTV" />
+
+</RelativeLayout>
