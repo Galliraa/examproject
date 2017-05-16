@@ -1,15 +1,23 @@
 package com.example.kenneth.examproject;
 
 import android.content.res.Configuration;
+import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.LinearLayout;
+import android.widget.Toast;
 
+import com.example.kenneth.examproject.Adapters.PageAdapter;
 import com.example.kenneth.examproject.Interfaces.EventSelectorInterface;
 import com.example.kenneth.examproject.Models.Event;
 
 import java.util.ArrayList;
+
+
+// sources:
+// https://github.com/codepath/android_guides/wiki/ViewPager-with-FragmentPagerAdapter
 
 public class MainActivity extends AppCompatActivity implements EventSelectorInterface{
 
@@ -36,6 +44,8 @@ public class MainActivity extends AppCompatActivity implements EventSelectorInte
     private static final String DAY_FRAG = "day_fragment";
     private static final String DETAILS_FRAG = "details_fragment";
 
+    FragmentPagerAdapter adapterViewPager;
+
 
     private UserMode lastViewState;
     private DayFragment dayEventList;
@@ -57,7 +67,11 @@ public class MainActivity extends AppCompatActivity implements EventSelectorInte
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_views);
 
-        listContainer = (LinearLayout)findViewById(R.id.list_container);
+        ViewPager vpPager = (ViewPager) findViewById(R.id.list_container);
+        adapterViewPager = new PageAdapter(getSupportFragmentManager(), getApplicationContext());
+        vpPager.setAdapter(adapterViewPager);
+
+        //listContainer = (LinearLayout)findViewById(R.id.list_container);
         detailsContainer = (LinearLayout)findViewById(R.id.details_container);
 
         //load Events from web
@@ -120,9 +134,33 @@ public class MainActivity extends AppCompatActivity implements EventSelectorInte
                 eventDetails = new DetailsFragment();
             }
 
+            // Attach the page change listener inside the activity
+            vpPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+
+                // This method will be invoked when a new page becomes selected.
+                @Override
+                public void onPageSelected(int position) {
+                    Toast.makeText(MainActivity.this,
+                            "Selected page position: " + position, Toast.LENGTH_SHORT).show();
+                }
+
+                // This method will be invoked when the current page is scrolled
+                @Override
+                public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+                    // Code goes here
+                }
+
+                // Called when the scroll state changes:
+                // SCROLL_STATE_IDLE, SCROLL_STATE_DRAGGING, SCROLL_STATE_SETTLING
+                @Override
+                public void onPageScrollStateChanged(int state) {
+                    // Code goes here
+                }
+            });
+
         }
 
-        updateFragmentViewState(userMode);
+        //updateFragmentViewState(userMode);
     }
 
     @Override
