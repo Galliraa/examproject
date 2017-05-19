@@ -1,21 +1,25 @@
 package com.example.kenneth.examproject;
 
+import android.support.v4.app.Fragment;
 import android.content.Context;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
+
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.kenneth.examproject.Interfaces.EventSelectorInterface;
 import com.example.kenneth.examproject.Models.Event;
+import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
-import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.lang.reflect.Field;
 
@@ -120,6 +124,14 @@ public class DetailsFragment extends Fragment implements OnMapReadyCallback{
         if (eMap == null){
             ((SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.MapFragment))
                     .getMapAsync(this);
+            eMap.addMarker(new MarkerOptions().position(new LatLng(eventSelector.getCurrentSelection().getLatitude(), eventSelector.getCurrentSelection().getLongitude())).title("You are here!"));
+            zoomToUser();
         }
+    }
+
+    private void zoomToUser(){
+
+            eMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
+                    new LatLng(eventSelector.getCurrentSelection().getLatitude(), eventSelector.getCurrentSelection().getLongitude()), 12));
     }
 }

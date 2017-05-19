@@ -72,11 +72,11 @@
     <fragment
         android:id="@+id/MapFragment"
         android:name="com.google.android.gms.maps.SupportMapFragment"
-        android:layout_width="95dp"
-        android:layout_height="95dp"
-        android:layout_centerHorizontal="true"
+        android:layout_width="match_parent"
+        android:layout_height="300dp"
         android:layout_alignParentBottom="true"
-        android:layout_below="@+id/eventAddressTV" />
+        android:layout_below="@+id/eventAddressTV"
+        android:layout_centerHorizontal="true" />
 
 </RelativeLayout>
 </ScrollView>

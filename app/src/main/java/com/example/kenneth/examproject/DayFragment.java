@@ -1,8 +1,9 @@
 package com.example.kenneth.examproject;
 
+import android.support.v4.app.Fragment;
 import android.content.Context;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
+
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,7 +19,6 @@ import java.util.ArrayList;
 
 public class DayFragment extends Fragment {
 
-    private int lolleren;
     private ListView eventListView;
     private DayListAdapter dayListAdapter;
     private ArrayList<Event> events;
