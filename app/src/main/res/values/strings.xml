@@ -6,4 +6,8 @@
     <string name="dayTitle">Day view</string>
     <string name="weekTitle">Week view</string>
     <string name="monthTitle">Month view</string>
+    <string name="facebook_app_id">128897477662015</string>
+    <string name="cityHint">Insert City here</string>
+    <string name="citySearch">Search by City</string>
+    <string name="locationSearch">Search by Location</string>
 </resources>
