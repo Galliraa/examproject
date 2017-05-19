@@ -13,8 +13,8 @@ public class Event {
     private String StartTime;
     private String Descrition;
     private String Address;
-    private float Longitude;
-    private float Latitude;
+    private double Longitude;
+    private double Latitude;
     private Bitmap EventImage;
 
     public String getId() {
@@ -57,7 +57,7 @@ public class Event {
         Address = address;
     }
 
-    public float getLongitude() {
+    public double getLongitude() {
         return Longitude;
     }
 
@@ -65,7 +65,7 @@ public class Event {
         Longitude = longitude;
     }
 
-    public float getLatitude() {
+    public double getLatitude() {
         return Latitude;
     }
 
