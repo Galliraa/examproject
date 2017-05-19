@@ -38,8 +38,8 @@ public class MainActivity extends AppCompatActivity implements EventSelectorInte
         return null;
     }
 
-    public enum PhoneMode {PORTRAIT, LANDSCAPE}
-    public enum UserMode {WEEK_VIEW, MONTH_VIEW, DAY_VIEW, DETAILS_VIEW}
+    private enum PhoneMode {PORTRAIT, LANDSCAPE}
+    private enum UserMode {LIST_VIEW, DETAILS_VIEW}
 
     private static final String WEEK_FRAG = "week_fragment";
     private static final String MONTH_FRAG = "month_fragment";
@@ -59,7 +59,7 @@ public class MainActivity extends AppCompatActivity implements EventSelectorInte
     private PhoneMode phoneMode;
     private UserMode userMode;
 
-    private int selectedMovieIndex;
+    private int selectedEventIndex;
 
     private LinearLayout listContainer;
     private LinearLayout detailsContainer;
@@ -88,8 +88,7 @@ public class MainActivity extends AppCompatActivity implements EventSelectorInte
 
         if(savedInstanceState == null) {
 
-            selectedMovieIndex = 0;
-            userMode = UserMode.WEEK_VIEW;
+            selectedEventIndex = 0;
 
             dayEventList = new DayFragment();
             eventDetails = new DetailsFragment();
@@ -98,7 +97,7 @@ public class MainActivity extends AppCompatActivity implements EventSelectorInte
 
             //load events to lists
             //dayEventList.setMovies(movies);
-            //eventDetails.setMovie(movies.get(selectedMovieIndex));
+            //eventDetails.setMovie(movies.get(selectedEventIndex));
 
             getSupportFragmentManager().beginTransaction()
                     .add(R.id.details_container, eventDetails, DAY_FRAG)
@@ -109,13 +108,11 @@ public class MainActivity extends AppCompatActivity implements EventSelectorInte
         } else {
             //got restarted, probably due to orientation change
 
-            selectedMovieIndex = savedInstanceState.getInt("movie_position");
+            selectedEventIndex = savedInstanceState.getInt("event_position");
             userMode = (UserMode) savedInstanceState.getSerializable("user_mode");
-            lastViewState = (UserMode) savedInstanceState.getSerializable("last_user_mode");
 
             if(userMode == null){
-                userMode = UserMode.DAY_VIEW;  //default
-                lastViewState = UserMode.DAY_VIEW;
+                userMode = UserMode.LIST_VIEW;  //default
             }
 
             //check if FragmentManager already holds instance of Fragments
@@ -173,14 +170,8 @@ public class MainActivity extends AppCompatActivity implements EventSelectorInte
         } else {
             if (userMode == UserMode.DETAILS_VIEW) {
                 //go back to last used listview
-                updateFragmentViewState(lastViewState);
-            } else if (userMode == UserMode.DAY_VIEW) {
-                //go to search activity from listview
-                finish();
-            } else if (userMode == UserMode.WEEK_VIEW){
-                //go to search activity from listview
-                finish();
-            } else if (userMode == UserMode.MONTH_VIEW){
+                updateFragmentViewState(UserMode.LIST_VIEW);
+            } else if (userMode == UserMode.LIST_VIEW) {
                 //go to search activity from listview
                 finish();
             }
@@ -189,27 +180,18 @@ public class MainActivity extends AppCompatActivity implements EventSelectorInte
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
-        outState.putInt("movie_position", selectedMovieIndex);
+        outState.putInt("event_position", selectedEventIndex);
         outState.putSerializable("user_mode", userMode);
-        outState.putSerializable("last_user_mode", lastViewState);
         super.onSaveInstanceState(outState);
     }
 
     private void updateFragmentViewState(UserMode targetMode){
 
-        if(targetMode == UserMode.DAY_VIEW) {
-            userMode = UserMode.DAY_VIEW;
-            lastViewState = UserMode.DAY_VIEW;
+        if(targetMode == UserMode.LIST_VIEW) {
+            userMode = UserMode.LIST_VIEW;
             switchFragment(targetMode);
-        } if(targetMode == UserMode.WEEK_VIEW) {
-            userMode = UserMode.WEEK_VIEW;
-            lastViewState = UserMode.WEEK_VIEW;
-            switchFragment(targetMode);
-        } if(targetMode == UserMode.MONTH_VIEW) {
-            userMode = UserMode.MONTH_VIEW;
-            lastViewState = UserMode.MONTH_VIEW;
-            switchFragment(targetMode);
-        } if(targetMode == UserMode.DETAILS_VIEW) {
+        }
+        if(targetMode == UserMode.DETAILS_VIEW) {
             userMode = UserMode.DETAILS_VIEW;
             switchFragment(targetMode);
         } else {
@@ -220,52 +202,14 @@ public class MainActivity extends AppCompatActivity implements EventSelectorInte
 
     private boolean switchFragment(UserMode targetMode){
         if(phoneMode == PhoneMode.PORTRAIT) {
-            if (targetMode == UserMode.DAY_VIEW) {
+            if (targetMode == UserMode.LIST_VIEW) {
                 listContainer.setVisibility(View.VISIBLE);
                 detailsContainer.setVisibility(View.GONE);
-                changeListContainerFragment(UserMode.DAY_VIEW);
-            } else if (targetMode == UserMode.WEEK_VIEW) {
-                listContainer.setVisibility(View.VISIBLE);
-                detailsContainer.setVisibility(View.GONE);
-                changeListContainerFragment(targetMode);
-            } else if (targetMode == UserMode.MONTH_VIEW) {
-                listContainer.setVisibility(View.VISIBLE);
-                detailsContainer.setVisibility(View.GONE);
-                changeListContainerFragment(targetMode);
             } else if (targetMode == UserMode.DETAILS_VIEW) {
                 listContainer.setVisibility(View.GONE);
                 detailsContainer.setVisibility(View.VISIBLE);
-                changeListContainerFragment(targetMode);
             }
-        } else {
-                changeListContainerFragment(targetMode);
-            }
-        return true;
-    }
-
-    @SuppressWarnings("ResourceType")
-    private void changeListContainerFragment(UserMode targetMode){
-        switch(targetMode) {
-            case DAY_VIEW:
-                getSupportFragmentManager().beginTransaction()
-                        .setCustomAnimations(R.animator.slide_in, R.animator.slide_out)
-                        .replace(R.id.list_container, dayEventList, DAY_FRAG)
-                        .commit();
-                break;
-
-            case WEEK_VIEW:
-                getSupportFragmentManager().beginTransaction()
-                        .setCustomAnimations(R.animator.slide_in, R.animator.slide_out)
-                        .replace(R.id.list_container, weekEventList, WEEK_FRAG)
-                        .commit();
-                break;
-
-            case MONTH_VIEW:
-                getSupportFragmentManager().beginTransaction()
-                        .setCustomAnimations(R.animator.slide_in, R.animator.slide_out)
-                        .replace(R.id.list_container, monthEventList, MONTH_FRAG)
-                        .commit();
-                break;
         }
+        return true;
     }
 }

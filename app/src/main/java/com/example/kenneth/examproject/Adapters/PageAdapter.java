@@ -23,7 +23,8 @@ import static com.example.kenneth.examproject.R.string.dayTitle;
 
 public class PageAdapter extends FragmentPagerAdapter {
     private static int NUM_ITEMS = 3;
-    Context context;
+
+    private Context context;
 
     public PageAdapter(FragmentManager fragmentManager, Context c) {
         super(fragmentManager);
