@@ -4,6 +4,7 @@ import android.support.v4.app.Fragment;
 import android.content.Context;
 import android.os.Bundle;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -35,6 +36,9 @@ public class DetailsFragment extends Fragment implements OnMapReadyCallback{
     private TextView descTV;
     private ImageView eventIV;
 
+    private double latti = 56.16984751;
+    private double longi = 10.20561455;
+
     private GoogleMap eMap;
 
     private EventSelectorInterface eventSelector;
@@ -56,6 +60,8 @@ public class DetailsFragment extends Fragment implements OnMapReadyCallback{
         eventIV = (ImageView) view.findViewById(R.id.eventIV);
        // updateEvents();
         setUpMap();
+
+        Log.d("DETAILSFRAGMENT", "onCreateView: Called");
 
         return view;
     }
@@ -116,6 +122,8 @@ public class DetailsFragment extends Fragment implements OnMapReadyCallback{
         eMap = googleMap;
         // Check if we were successful in obtaining the map.
         if (eMap != null) {
+            eMap.addMarker(new MarkerOptions().position(new LatLng(latti, longi)).title("You are here!"));
+            zoomToUser();
         }
 
     }
@@ -124,14 +132,12 @@ public class DetailsFragment extends Fragment implements OnMapReadyCallback{
         if (eMap == null){
             ((SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.MapFragment))
                     .getMapAsync(this);
-            eMap.addMarker(new MarkerOptions().position(new LatLng(eventSelector.getCurrentSelection().getLatitude(), eventSelector.getCurrentSelection().getLongitude())).title("You are here!"));
-            zoomToUser();
         }
     }
 
     private void zoomToUser(){
 
             eMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
-                    new LatLng(eventSelector.getCurrentSelection().getLatitude(), eventSelector.getCurrentSelection().getLongitude()), 12));
+                    new LatLng(latti, longi), 12));
     }
 }
