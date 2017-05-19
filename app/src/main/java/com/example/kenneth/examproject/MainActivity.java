@@ -3,15 +3,23 @@ package com.example.kenneth.examproject;
 //rimelig nice forsøg
 
 import android.content.res.Configuration;
+import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.LinearLayout;
+import android.widget.Toast;
 
+import com.example.kenneth.examproject.Adapters.PageAdapter;
 import com.example.kenneth.examproject.Interfaces.EventSelectorInterface;
 import com.example.kenneth.examproject.Models.Event;
 
 import java.util.ArrayList;
+
+
+// sources:
+// https://github.com/codepath/android_guides/wiki/ViewPager-with-FragmentPagerAdapter
 
 public class MainActivity extends AppCompatActivity implements EventSelectorInterface{
 
@@ -30,13 +38,15 @@ public class MainActivity extends AppCompatActivity implements EventSelectorInte
         return null;
     }
 
-    public enum PhoneMode {PORTRAIT, LANDSCAPE}
-    public enum UserMode {WEEK_VIEW, MONTH_VIEW, DAY_VIEW, DETAILS_VIEW}
+    private enum PhoneMode {PORTRAIT, LANDSCAPE}
+    private enum UserMode {LIST_VIEW, DETAILS_VIEW}
 
     private static final String WEEK_FRAG = "week_fragment";
     private static final String MONTH_FRAG = "month_fragment";
     private static final String DAY_FRAG = "day_fragment";
     private static final String DETAILS_FRAG = "details_fragment";
+
+    FragmentPagerAdapter adapterViewPager;
 
 
     private UserMode lastViewState;
@@ -49,7 +59,7 @@ public class MainActivity extends AppCompatActivity implements EventSelectorInte
     private PhoneMode phoneMode;
     private UserMode userMode;
 
-    private int selectedMovieIndex;
+    private int selectedEventIndex;
 
     private LinearLayout listContainer;
     private LinearLayout detailsContainer;
@@ -59,7 +69,11 @@ public class MainActivity extends AppCompatActivity implements EventSelectorInte
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_views);
 
-        listContainer = (LinearLayout)findViewById(R.id.list_container);
+        ViewPager vpPager = (ViewPager) findViewById(R.id.list_container);
+        adapterViewPager = new PageAdapter(getSupportFragmentManager(), getApplicationContext());
+        vpPager.setAdapter(adapterViewPager);
+
+        //listContainer = (LinearLayout)findViewById(R.id.list_container);
         detailsContainer = (LinearLayout)findViewById(R.id.details_container);
 
         //load Events from web
@@ -74,8 +88,7 @@ public class MainActivity extends AppCompatActivity implements EventSelectorInte
 
         if(savedInstanceState == null) {
 
-            selectedMovieIndex = 0;
-            userMode = UserMode.WEEK_VIEW;
+            selectedEventIndex = 0;
 
             dayEventList = new DayFragment();
             eventDetails = new DetailsFragment();
@@ -84,7 +97,7 @@ public class MainActivity extends AppCompatActivity implements EventSelectorInte
 
             //load events to lists
             //dayEventList.setMovies(movies);
-            //eventDetails.setMovie(movies.get(selectedMovieIndex));
+            //eventDetails.setMovie(movies.get(selectedEventIndex));
 
             getSupportFragmentManager().beginTransaction()
                     .add(R.id.details_container, eventDetails, DAY_FRAG)
@@ -95,13 +108,11 @@ public class MainActivity extends AppCompatActivity implements EventSelectorInte
         } else {
             //got restarted, probably due to orientation change
 
-            selectedMovieIndex = savedInstanceState.getInt("movie_position");
+            selectedEventIndex = savedInstanceState.getInt("event_position");
             userMode = (UserMode) savedInstanceState.getSerializable("user_mode");
-            lastViewState = (UserMode) savedInstanceState.getSerializable("last_user_mode");
 
             if(userMode == null){
-                userMode = UserMode.DAY_VIEW;  //default
-                lastViewState = UserMode.DAY_VIEW;
+                userMode = UserMode.LIST_VIEW;  //default
             }
 
             //check if FragmentManager already holds instance of Fragments
@@ -122,9 +133,33 @@ public class MainActivity extends AppCompatActivity implements EventSelectorInte
                 eventDetails = new DetailsFragment();
             }
 
+            // Attach the page change listener inside the activity
+            vpPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+
+                // This method will be invoked when a new page becomes selected.
+                @Override
+                public void onPageSelected(int position) {
+                    Toast.makeText(MainActivity.this,
+                            "Selected page position: " + position, Toast.LENGTH_SHORT).show();
+                }
+
+                // This method will be invoked when the current page is scrolled
+                @Override
+                public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+                    // Code goes here
+                }
+
+                // Called when the scroll state changes:
+                // SCROLL_STATE_IDLE, SCROLL_STATE_DRAGGING, SCROLL_STATE_SETTLING
+                @Override
+                public void onPageScrollStateChanged(int state) {
+                    // Code goes here
+                }
+            });
+
         }
 
-        updateFragmentViewState(userMode);
+        //updateFragmentViewState(userMode);
     }
 
     @Override
@@ -135,14 +170,8 @@ public class MainActivity extends AppCompatActivity implements EventSelectorInte
         } else {
             if (userMode == UserMode.DETAILS_VIEW) {
                 //go back to last used listview
-                updateFragmentViewState(lastViewState);
-            } else if (userMode == UserMode.DAY_VIEW) {
-                //go to search activity from listview
-                finish();
-            } else if (userMode == UserMode.WEEK_VIEW){
-                //go to search activity from listview
-                finish();
-            } else if (userMode == UserMode.MONTH_VIEW){
+                updateFragmentViewState(UserMode.LIST_VIEW);
+            } else if (userMode == UserMode.LIST_VIEW) {
                 //go to search activity from listview
                 finish();
             }
@@ -151,27 +180,18 @@ public class MainActivity extends AppCompatActivity implements EventSelectorInte
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
-        outState.putInt("movie_position", selectedMovieIndex);
+        outState.putInt("event_position", selectedEventIndex);
         outState.putSerializable("user_mode", userMode);
-        outState.putSerializable("last_user_mode", lastViewState);
         super.onSaveInstanceState(outState);
     }
 
     private void updateFragmentViewState(UserMode targetMode){
 
-        if(targetMode == UserMode.DAY_VIEW) {
-            userMode = UserMode.DAY_VIEW;
-            lastViewState = UserMode.DAY_VIEW;
+        if(targetMode == UserMode.LIST_VIEW) {
+            userMode = UserMode.LIST_VIEW;
             switchFragment(targetMode);
-        } if(targetMode == UserMode.WEEK_VIEW) {
-            userMode = UserMode.WEEK_VIEW;
-            lastViewState = UserMode.WEEK_VIEW;
-            switchFragment(targetMode);
-        } if(targetMode == UserMode.MONTH_VIEW) {
-            userMode = UserMode.MONTH_VIEW;
-            lastViewState = UserMode.MONTH_VIEW;
-            switchFragment(targetMode);
-        } if(targetMode == UserMode.DETAILS_VIEW) {
+        }
+        if(targetMode == UserMode.DETAILS_VIEW) {
             userMode = UserMode.DETAILS_VIEW;
             switchFragment(targetMode);
         } else {
@@ -182,52 +202,14 @@ public class MainActivity extends AppCompatActivity implements EventSelectorInte
 
     private boolean switchFragment(UserMode targetMode){
         if(phoneMode == PhoneMode.PORTRAIT) {
-            if (targetMode == UserMode.DAY_VIEW) {
+            if (targetMode == UserMode.LIST_VIEW) {
                 listContainer.setVisibility(View.VISIBLE);
                 detailsContainer.setVisibility(View.GONE);
-                changeListContainerFragment(UserMode.DAY_VIEW);
-            } else if (targetMode == UserMode.WEEK_VIEW) {
-                listContainer.setVisibility(View.VISIBLE);
-                detailsContainer.setVisibility(View.GONE);
-                changeListContainerFragment(targetMode);
-            } else if (targetMode == UserMode.MONTH_VIEW) {
-                listContainer.setVisibility(View.VISIBLE);
-                detailsContainer.setVisibility(View.GONE);
-                changeListContainerFragment(targetMode);
             } else if (targetMode == UserMode.DETAILS_VIEW) {
                 listContainer.setVisibility(View.GONE);
                 detailsContainer.setVisibility(View.VISIBLE);
-                changeListContainerFragment(targetMode);
             }
-        } else {
-                changeListContainerFragment(targetMode);
-            }
-        return true;
-    }
-
-    @SuppressWarnings("ResourceType")
-    private void changeListContainerFragment(UserMode targetMode){
-        switch(targetMode) {
-            case DAY_VIEW:
-                getSupportFragmentManager().beginTransaction()
-                        .setCustomAnimations(R.animator.slide_in, R.animator.slide_out)
-                        .replace(R.id.list_container, dayEventList, DAY_FRAG)
-                        .commit();
-                break;
-
-            case WEEK_VIEW:
-                getSupportFragmentManager().beginTransaction()
-                        .setCustomAnimations(R.animator.slide_in, R.animator.slide_out)
-                        .replace(R.id.list_container, weekEventList, WEEK_FRAG)
-                        .commit();
-                break;
-
-            case MONTH_VIEW:
-                getSupportFragmentManager().beginTransaction()
-                        .setCustomAnimations(R.animator.slide_in, R.animator.slide_out)
-                        .replace(R.id.list_container, monthEventList, MONTH_FRAG)
-                        .commit();
-                break;
         }
+        return true;
     }
 }
