@@ -67,15 +67,16 @@
         android:layout_toStartOf="@+id/eventDateTV"
         android:text="TextView"
         android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true"
         android:layout_toLeftOf="@+id/eventDateTV" />
 
-    <com.google.android.gms.maps.MapView
-        android:id="@+id/eventMV"
-        android:layout_width="200dp"
-        android:layout_height="200dp"
-        android:layout_below="@+id/eventAddressTV"
-        android:layout_centerHorizontal="true" />
+    <fragment
+        android:id="@+id/MapFragment"
+        android:name="com.google.android.gms.maps.SupportMapFragment"
+        android:layout_width="95dp"
+        android:layout_height="95dp"
+        android:layout_centerHorizontal="true"
+        android:layout_alignParentBottom="true"
+        android:layout_below="@+id/eventAddressTV" />
 
 </RelativeLayout>
 </ScrollView>
