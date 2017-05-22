@@ -1,19 +1,31 @@
 package com.example.kenneth.examproject;
 
+import android.content.BroadcastReceiver;
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.ServiceConnection;
 import android.content.res.Configuration;
+import android.net.ConnectivityManager;
+import android.os.IBinder;
 import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.example.kenneth.examproject.Adapters.PageAdapter;
+import com.example.kenneth.examproject.DatabaseHelpers.DatabaseHelper;
 import com.example.kenneth.examproject.Interfaces.EventSelectorInterface;
 import com.example.kenneth.examproject.Models.Event;
+import com.example.kenneth.examproject.Services.EventService;
 
-import java.util.ArrayList;
+import java.util.List;
 
 
 // sources:
@@ -27,8 +39,8 @@ public class MainActivity extends AppCompatActivity implements EventSelectorInte
     }
 
     @Override
-    public ArrayList<Event> getEventList() {
-        return null;
+    public List<Event> getEventList() {
+        return events;
     }
 
     @Override
@@ -47,19 +59,19 @@ public class MainActivity extends AppCompatActivity implements EventSelectorInte
     FragmentPagerAdapter adapterViewPager;
 
 
-    private UserMode lastViewState;
-    private DayFragment dayEventList;
+    private ServiceConnection eventServiceConnection;
+    private EventService eventService;
+
     private DetailsFragment eventDetails;
-    private MonthFragment monthEventList;
-    private WeekFragment weekEventList;
-    private ArrayList<Event> events;
+    private List<Event> events;
+    private DatabaseHelper db;
 
     private PhoneMode phoneMode;
     private UserMode userMode;
 
     private int selectedEventIndex;
 
-    private LinearLayout listContainer;
+    private ViewPager vpPager;
     private LinearLayout detailsContainer;
 
     @Override
@@ -67,11 +79,21 @@ public class MainActivity extends AppCompatActivity implements EventSelectorInte
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_views);
 
-        ViewPager vpPager = (ViewPager) findViewById(R.id.list_container);
+        db = new DatabaseHelper(getApplicationContext());
+
+        final ConnectivityManager cm =
+                (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
+
+        setupConnectionToWeatherService();
+        startWeatherService();
+        bindToWeatherService();
+
+        vpPager = (ViewPager) findViewById(R.id.list_container);
         adapterViewPager = new PageAdapter(getSupportFragmentManager(), getApplicationContext());
+        DayFragment dayfrag = (DayFragment) adapterViewPager.getItem(0);
+
         vpPager.setAdapter(adapterViewPager);
 
-        //listContainer = (LinearLayout)findViewById(R.id.list_container);
         detailsContainer = (LinearLayout)findViewById(R.id.details_container);
 
         //load Events from web
@@ -88,49 +110,22 @@ public class MainActivity extends AppCompatActivity implements EventSelectorInte
 
             selectedEventIndex = 0;
 
-            dayEventList = new DayFragment();
             eventDetails = new DetailsFragment();
-            monthEventList = new MonthFragment();
-            weekEventList = new WeekFragment();
 
-            //load events to lists
-            //dayEventList.setMovies(movies);
-            //eventDetails.setMovie(movies.get(selectedEventIndex));
+            if(userMode == null){
+                userMode = UserMode.LIST_VIEW;  //default
+            }
 
-            getSupportFragmentManager().beginTransaction()
-                    .add(R.id.details_container, eventDetails, DAY_FRAG)
-                    .add(R.id.list_container, weekEventList, WEEK_FRAG)
-                    .add(R.id.list_container, monthEventList, MONTH_FRAG)
-                    .replace(R.id.list_container, dayEventList, DAY_FRAG)
-                    .commit();
         } else {
             //got restarted, probably due to orientation change
 
             selectedEventIndex = savedInstanceState.getInt("event_position");
             userMode = (UserMode) savedInstanceState.getSerializable("user_mode");
 
-            if(userMode == null){
+            if (userMode == null) {
                 userMode = UserMode.LIST_VIEW;  //default
             }
-
-            //check if FragmentManager already holds instance of Fragments
-            dayEventList = (DayFragment) getSupportFragmentManager().findFragmentByTag(DAY_FRAG);
-            if(dayEventList ==null){
-                dayEventList = new DayFragment();
-            }
-            weekEventList = (WeekFragment)getSupportFragmentManager().findFragmentByTag(WEEK_FRAG);
-            if(weekEventList ==null){
-                weekEventList = new WeekFragment();
-            }
-            monthEventList = (MonthFragment) getSupportFragmentManager().findFragmentByTag(MONTH_FRAG);
-            if(monthEventList ==null){
-                monthEventList = new MonthFragment();
-            }
-            eventDetails = (DetailsFragment) getSupportFragmentManager().findFragmentByTag(DETAILS_FRAG);
-            if(eventDetails ==null){
-                eventDetails = new DetailsFragment();
-            }
-
+        }
             // Attach the page change listener inside the activity
             vpPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
 
@@ -155,7 +150,7 @@ public class MainActivity extends AppCompatActivity implements EventSelectorInte
                 }
             });
 
-        }
+
 
         //updateFragmentViewState(userMode);
     }
@@ -198,16 +193,113 @@ public class MainActivity extends AppCompatActivity implements EventSelectorInte
 
     }
 
+    @Override
+    protected void onStart() {
+        super.onStart();
+        LocalBroadcastManager.getInstance(this).registerReceiver(onWeatherServiceResult,
+                new IntentFilter(EventService.EVENT_UPDATED_EVENT));
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        unbindFromWeatherService();
+    }
+
     private boolean switchFragment(UserMode targetMode){
         if(phoneMode == PhoneMode.PORTRAIT) {
             if (targetMode == UserMode.LIST_VIEW) {
-                listContainer.setVisibility(View.VISIBLE);
+                vpPager.setVisibility(View.VISIBLE);
                 detailsContainer.setVisibility(View.GONE);
             } else if (targetMode == UserMode.DETAILS_VIEW) {
-                listContainer.setVisibility(View.GONE);
+                vpPager.setVisibility(View.GONE);
                 detailsContainer.setVisibility(View.VISIBLE);
             }
         }
         return true;
+    }
+    private void startWeatherService() {
+        startService(new Intent(this, EventService.class));
+    }
+
+    private void stopWeatherService() {
+        stopService(new Intent(getBaseContext(), EventService.class));
+    }
+
+    private void setupConnectionToWeatherService(){
+        eventServiceConnection = new ServiceConnection() {
+            public void onServiceConnected(ComponentName className, IBinder service) {
+                // This is called when the connection with the service has been
+                // established, giving us the service object we can use to
+                // interact with the service.  Because we have bound to a explicit
+                // service that we know is running in our own process, we can
+                // cast its IBinder to a concrete class and directly access it.
+                //ref: http://developer.android.com/reference/android/app/Service.html
+                eventService = ((EventService.EventServiceBinder)service).getService();
+                Log.d("MAIN", "Weather service bound");
+
+            }
+
+            public void onServiceDisconnected(ComponentName className) {
+                // This is called when the connection with the service has been
+                // unexpectedly disconnected -- that is, its process crashed.
+                // Because it is running in our same process, we should never
+                // see this happen.
+                //ref: http://developer.android.com/reference/android/app/Service.html
+                eventService = null;
+                Log.d("MAIN", "Weather service unbound");
+            }
+        };
+    }
+
+    private void bindToWeatherService(){
+        bindService(new Intent(MainActivity.this,
+                EventService.class), eventServiceConnection, Context.BIND_ABOVE_CLIENT);
+    }
+
+    private void unbindFromWeatherService(){
+        unbindService(eventServiceConnection);
+    }
+
+    private BroadcastReceiver onWeatherServiceResult = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Boolean result = intent.getBooleanExtra(EventService.GET_EVENT_TASK_RESULT, false);
+
+            /*if (firstUpdate)
+            {
+                events = eventService.getAllEvents();
+                updateEvents();
+                firstUpdate = false;
+            }
+*/
+            Log.d("MAIN", "onReceive: GetWeatherTask result received " + result);
+            if (result) {
+                events = eventService.getAllEvents();
+                updateEvents();
+            }
+            else
+                Toast.makeText(getBaseContext(), "No new data", Toast.LENGTH_SHORT).show();
+            //fab.setClickable(true);
+        }
+    };
+    public void updateEvents(){
+
+        if (events != null) {
+
+            //dayView
+            DayFragment dayfrag = (DayFragment) adapterViewPager.getItem(0);
+            dayfrag.updateEvents();
+            vpPager.setAdapter(adapterViewPager);
+            //weekView
+            //weekEventList.updateEvents();
+
+            //monthView
+            //monthEventList.updateEvents();
+
+        }
+        else
+            Log.d("MAIN", "updateWeathers: weathers = null");
+
     }
 }
