@@ -5,14 +5,13 @@
     tools:context="com.example.kenneth.examproject.WeekFragment">
 
     <GridView xmlns:android="http://schemas.android.com/apk/res/android"
-        android:id="@+id/grid_view"
+        android:id="@+id/EventGV"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
-        android:numColumns="3"
         android:columnWidth="90dp"
-        android:horizontalSpacing="0dp"
-        android:verticalSpacing="30dp"
         android:gravity="center"
-        android:stretchMode="columnWidth" >
-    </GridView>
+        android:horizontalSpacing="0dp"
+        android:numColumns="3"
+        android:stretchMode="columnWidth"
+        android:verticalSpacing="30dp"></GridView>
 </RelativeLayout>
