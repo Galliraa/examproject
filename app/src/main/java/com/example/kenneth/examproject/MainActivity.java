@@ -23,6 +23,7 @@ import android.widget.Toast;
 import com.example.kenneth.examproject.Adapters.PageAdapter;
 import com.example.kenneth.examproject.DatabaseHelpers.DatabaseHelper;
 import com.example.kenneth.examproject.Interfaces.EventSelectorInterface;
+import com.example.kenneth.examproject.Interfaces.ForceUiUpdateInterface;
 import com.example.kenneth.examproject.Models.Event;
 import com.example.kenneth.examproject.Services.EventService;
 
@@ -59,9 +60,6 @@ public class MainActivity extends AppCompatActivity implements EventSelectorInte
     private enum PhoneMode {PORTRAIT, LANDSCAPE}
     private enum UserMode {LIST_VIEW, DETAILS_VIEW}
 
-    private static final String WEEK_FRAG = "week_fragment";
-    private static final String MONTH_FRAG = "month_fragment";
-    private static final String DAY_FRAG = "day_fragment";
     private static final String DETAILS_FRAG = "details_fragment";
 
     FragmentPagerAdapter adapterViewPager;
@@ -114,7 +112,7 @@ public class MainActivity extends AppCompatActivity implements EventSelectorInte
 
         if(savedInstanceState == null) {
 
-            selectedEventIndex = 0;
+            selectedEventIndex = 1;
 
             eventDetails = new DetailsFragment();
 
@@ -123,7 +121,7 @@ public class MainActivity extends AppCompatActivity implements EventSelectorInte
             }
 
             getSupportFragmentManager().beginTransaction()
-                    .add(R.id.details_container, eventDetails, DAY_FRAG)
+                    .add(R.id.details_container, eventDetails, DETAILS_FRAG)
                     .commit();
 
         } else {
@@ -144,9 +142,8 @@ public class MainActivity extends AppCompatActivity implements EventSelectorInte
 
 
 
-
             // Attach the page change listener inside the activity
-            vpPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+            vpPager.addOnPageChangeListener( new ViewPager.OnPageChangeListener() {
 
                 // This method will be invoked when a new page becomes selected.
                 @Override
@@ -157,7 +154,7 @@ public class MainActivity extends AppCompatActivity implements EventSelectorInte
 
                     if (fragment != null)
                     {
-                        fragment.onResume();
+                        ((ForceUiUpdateInterface)fragment).updateEvents();
                     }
                 }
 
@@ -174,9 +171,6 @@ public class MainActivity extends AppCompatActivity implements EventSelectorInte
                     // Code goes here
                 }
             });
-
-
-
     }
 
     @Override
@@ -297,9 +291,16 @@ public class MainActivity extends AppCompatActivity implements EventSelectorInte
             Log.d("MAIN", "onReceive: GetWeatherTask result received " + result);
             if (result) {
                 events = eventService.getAllEvents();
+
+                Fragment fragment = ((PageAdapter)vpPager.getAdapter()).getFragment(vpPager.getCurrentItem());
+                if (fragment != null)
+                {
+                    ((ForceUiUpdateInterface)fragment).updateEvents();
+                }
             }
             else
                 Toast.makeText(getBaseContext(), "No new data", Toast.LENGTH_SHORT).show();
         }
     };
+
 }

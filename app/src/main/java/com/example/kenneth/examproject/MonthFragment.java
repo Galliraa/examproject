@@ -11,13 +11,14 @@ import android.widget.ListView;
 
 import com.example.kenneth.examproject.Adapters.MonthListAdapter;
 import com.example.kenneth.examproject.Interfaces.EventSelectorInterface;
+import com.example.kenneth.examproject.Interfaces.ForceUiUpdateInterface;
 import com.example.kenneth.examproject.Models.Event;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MonthFragment extends Fragment {
+public class MonthFragment extends Fragment implements ForceUiUpdateInterface {
 
 
     private ListView eventListView;
@@ -32,7 +33,6 @@ public class MonthFragment extends Fragment {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_month, container, false);
         eventListView = (ListView) view.findViewById(R.id.eventLV);
-        updateEvents();
         return view;
     }
 
@@ -56,7 +56,7 @@ public class MonthFragment extends Fragment {
             eventListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 @Override
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                    onSongSelected(position);
+                    onEventSelected(position);
 
                 }
             });
@@ -67,7 +67,7 @@ public class MonthFragment extends Fragment {
         events = (ArrayList<Event>) eventList.clone();
     }
 
-    private void onSongSelected(int position) {
+    private void onEventSelected(int position) {
         if(eventSelector !=null) {
             eventSelector.onEventSelected(position);
         }
