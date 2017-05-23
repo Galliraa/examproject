@@ -15,13 +15,14 @@ import com.example.kenneth.examproject.Models.Event;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.List;
 
 public class MonthFragment extends Fragment {
 
 
     private ListView eventListView;
     private MonthListAdapter monthListAdapter;
-    private ArrayList<Event> events;
+    private List<Event> events;
 
     private EventSelectorInterface eventSelector;
 
@@ -35,6 +36,12 @@ public class MonthFragment extends Fragment {
         return view;
     }
 
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        updateEvents();
+    }
 
     public void updateEvents(){
         if(eventSelector != null)

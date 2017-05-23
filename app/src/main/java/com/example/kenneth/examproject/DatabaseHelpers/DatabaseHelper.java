@@ -46,7 +46,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
      * make call to static method "getInstance()" instead.
      */
 
-    private DatabaseHelper(Context context) {
+    public DatabaseHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
 
@@ -77,12 +77,15 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     //add new row to database
     public void addEvent(Event event){
 
-        Bitmap bmp = event.getEventImage();
-        ByteArrayOutputStream stream = new ByteArrayOutputStream();
-        bmp.compress(Bitmap.CompressFormat.PNG, 100, stream);
-        byte[] byteArray = stream.toByteArray();
-
         ContentValues values = new ContentValues();
+        Bitmap bmp = event.getEventImage();
+        if (bmp!=null) {
+            ByteArrayOutputStream stream = new ByteArrayOutputStream();
+            bmp.compress(Bitmap.CompressFormat.PNG, 100, stream);
+            byte[] byteArray = stream.toByteArray();
+            values.put(COLUMN_IMAGE, byteArray);
+        }
+
         values.put(COLUMN_START_TIME, event.getStartTime());
         values.put(COLUMN_DESC, event.getDescrition());
         values.put(COLUMN_NAME, event.getName());
@@ -90,7 +93,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         values.put(COLUMN_EVENT_ID, event.getId());
         values.put(COLUMN_LONGITUDE, event.getLongitude());
         values.put(COLUMN_LATITUDE, event.getLatitude());
-        values.put(COLUMN_IMAGE, byteArray);
+
 
         SQLiteDatabase db = sInstance.getWritableDatabase();
         db.insert(TABLE_NAME, null, values);
@@ -136,9 +139,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 temp.setLongitude(c.getFloat(c.getColumnIndex(COLUMN_LONGITUDE)));
                 temp.setLatitude(c.getFloat(c.getColumnIndex(COLUMN_LATITUDE)));
 
-                byte[] byteArray = c.getBlob(c.getColumnIndex(COLUMN_IMAGE));
-                Bitmap bitmap = BitmapFactory.decodeByteArray(byteArray, 0, byteArray.length);
-                temp.setEventImage(bitmap);
+                //byte[] byteArray = c.getBlob(c.getColumnIndex(COLUMN_IMAGE));
+                //Bitmap bitmap = BitmapFactory.decodeByteArray(byteArray, 0, byteArray.length);
+                //temp.setEventImage(bitmap);
                 events.add(events.size(), temp);
                 c.moveToPrevious();
             }

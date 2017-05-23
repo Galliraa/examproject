@@ -5,6 +5,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
 
 import com.facebook.AccessToken;
@@ -31,6 +33,8 @@ public class LoginActivity extends AppCompatActivity {
 
     private TextView info;
     private LoginButton loginButton;
+    private Button searchCity;
+    private Button searchLocation;
     List<String> IDList = new ArrayList<String>();
     List <String> eventIDs = new ArrayList <String>();
 
@@ -42,7 +46,9 @@ public class LoginActivity extends AppCompatActivity {
         callbackManager = CallbackManager.Factory.create();
 
         setContentView(R.layout.activity_login);
-        setContentView(R.layout.activity_login);
+
+        searchCity = (Button) findViewById(R.id.cityButton);
+        searchLocation = (Button) findViewById(R.id.locationButton);
         info = (TextView)findViewById(R.id.info);
         loginButton = (LoginButton)findViewById(R.id.login_button);
 
@@ -68,6 +74,32 @@ public class LoginActivity extends AppCompatActivity {
                 info.setText("Login attempt failed.");
             }
         });
+        searchCity.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                searchCityFunc();
+            }
+        });
+        searchLocation.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                searchLocationFunc();
+            }
+        });
+    }
+
+    private void searchCityFunc(){
+        Intent i = new Intent(this, MainActivity.class);
+        //initiate service to search by city name here....
+
+        startActivity(i);
+    }
+
+    private void searchLocationFunc(){
+        Intent i = new Intent(this, MainActivity.class);
+        //initiate service to search by current location here...
+
+        startActivity(i);
     }
 
     @Override

@@ -7,6 +7,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.GridView;
 import android.widget.ListView;
 
 import com.example.kenneth.examproject.Adapters.WeekListAdapter;
@@ -15,13 +16,14 @@ import com.example.kenneth.examproject.Models.Event;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.List;
 
 public class WeekFragment extends Fragment {
 
 
-    private ListView eventListView;
+    private GridView eventListView;
     private WeekListAdapter weekListAdapter;
-    private ArrayList<Event> events;
+    private List<Event> events;
 
     private EventSelectorInterface eventSelector;
 
@@ -30,11 +32,17 @@ public class WeekFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_week, container, false);
-        eventListView = (ListView) view.findViewById(R.id.eventLV);
+        eventListView = (GridView) view.findViewById(R.id.EventGV);
         updateEvents();
         return view;
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        updateEvents();
+
+    }
 
     public void updateEvents(){
         if(eventSelector != null)

@@ -9,6 +9,7 @@ import android.content.ServiceConnection;
 import android.content.res.Configuration;
 import android.net.ConnectivityManager;
 import android.os.IBinder;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.ViewPager;
@@ -35,7 +36,14 @@ public class MainActivity extends AppCompatActivity implements EventSelectorInte
 
     @Override
     public void onEventSelected(int position) {
-
+        if(eventDetails!=null){
+            Event selectedEvent = events.get(position);
+            if(selectedEvent!=null) {
+                selectedEventIndex = position;
+                eventDetails.setEvent(selectedEvent);
+            }
+        }
+        updateFragmentViewState(UserMode.DETAILS_VIEW);
     }
 
     @Override
@@ -84,14 +92,12 @@ public class MainActivity extends AppCompatActivity implements EventSelectorInte
         final ConnectivityManager cm =
                 (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
 
-        setupConnectionToWeatherService();
-        startWeatherService();
-        bindToWeatherService();
+        setupConnectionToEventService();
+        startEventService();
+        bindToEventService();
 
         vpPager = (ViewPager) findViewById(R.id.list_container);
         adapterViewPager = new PageAdapter(getSupportFragmentManager(), getApplicationContext());
-        DayFragment dayfrag = (DayFragment) adapterViewPager.getItem(0);
-
         vpPager.setAdapter(adapterViewPager);
 
         detailsContainer = (LinearLayout)findViewById(R.id.details_container);
@@ -116,6 +122,10 @@ public class MainActivity extends AppCompatActivity implements EventSelectorInte
                 userMode = UserMode.LIST_VIEW;  //default
             }
 
+            getSupportFragmentManager().beginTransaction()
+                    .add(R.id.details_container, eventDetails, DAY_FRAG)
+                    .commit();
+
         } else {
             //got restarted, probably due to orientation change
 
@@ -125,7 +135,16 @@ public class MainActivity extends AppCompatActivity implements EventSelectorInte
             if (userMode == null) {
                 userMode = UserMode.LIST_VIEW;  //default
             }
+
+            eventDetails = (DetailsFragment) getSupportFragmentManager().findFragmentByTag(DETAILS_FRAG);
+            if(eventDetails ==null){
+                eventDetails = new DetailsFragment();
+            }
         }
+
+
+
+
             // Attach the page change listener inside the activity
             vpPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
 
@@ -134,6 +153,12 @@ public class MainActivity extends AppCompatActivity implements EventSelectorInte
                 public void onPageSelected(int position) {
                     Toast.makeText(MainActivity.this,
                             "Selected page position: " + position, Toast.LENGTH_SHORT).show();
+                    Fragment fragment = ((PageAdapter)vpPager.getAdapter()).getFragment(position);
+
+                    if (fragment != null)
+                    {
+                        fragment.onResume();
+                    }
                 }
 
                 // This method will be invoked when the current page is scrolled
@@ -152,7 +177,6 @@ public class MainActivity extends AppCompatActivity implements EventSelectorInte
 
 
 
-        //updateFragmentViewState(userMode);
     }
 
     @Override
@@ -196,14 +220,18 @@ public class MainActivity extends AppCompatActivity implements EventSelectorInte
     @Override
     protected void onStart() {
         super.onStart();
-        LocalBroadcastManager.getInstance(this).registerReceiver(onWeatherServiceResult,
+        LocalBroadcastManager.getInstance(this).registerReceiver(onEventServiceResult,
                 new IntentFilter(EventService.EVENT_UPDATED_EVENT));
+
+        updateFragmentViewState(userMode);
     }
+
+
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        unbindFromWeatherService();
+        unbindFromEventService();
     }
 
     private boolean switchFragment(UserMode targetMode){
@@ -218,7 +246,7 @@ public class MainActivity extends AppCompatActivity implements EventSelectorInte
         }
         return true;
     }
-    private void startWeatherService() {
+    private void startEventService() {
         startService(new Intent(this, EventService.class));
     }
 
@@ -226,7 +254,7 @@ public class MainActivity extends AppCompatActivity implements EventSelectorInte
         stopService(new Intent(getBaseContext(), EventService.class));
     }
 
-    private void setupConnectionToWeatherService(){
+    private void setupConnectionToEventService(){
         eventServiceConnection = new ServiceConnection() {
             public void onServiceConnected(ComponentName className, IBinder service) {
                 // This is called when the connection with the service has been
@@ -252,54 +280,26 @@ public class MainActivity extends AppCompatActivity implements EventSelectorInte
         };
     }
 
-    private void bindToWeatherService(){
+    private void bindToEventService(){
         bindService(new Intent(MainActivity.this,
                 EventService.class), eventServiceConnection, Context.BIND_ABOVE_CLIENT);
     }
 
-    private void unbindFromWeatherService(){
+    private void unbindFromEventService(){
         unbindService(eventServiceConnection);
     }
 
-    private BroadcastReceiver onWeatherServiceResult = new BroadcastReceiver() {
+    private BroadcastReceiver onEventServiceResult = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             Boolean result = intent.getBooleanExtra(EventService.GET_EVENT_TASK_RESULT, false);
 
-            /*if (firstUpdate)
-            {
-                events = eventService.getAllEvents();
-                updateEvents();
-                firstUpdate = false;
-            }
-*/
             Log.d("MAIN", "onReceive: GetWeatherTask result received " + result);
             if (result) {
                 events = eventService.getAllEvents();
-                updateEvents();
             }
             else
                 Toast.makeText(getBaseContext(), "No new data", Toast.LENGTH_SHORT).show();
-            //fab.setClickable(true);
         }
     };
-    public void updateEvents(){
-
-        if (events != null) {
-
-            //dayView
-            DayFragment dayfrag = (DayFragment) adapterViewPager.getItem(0);
-            dayfrag.updateEvents();
-            vpPager.setAdapter(adapterViewPager);
-            //weekView
-            //weekEventList.updateEvents();
-
-            //monthView
-            //monthEventList.updateEvents();
-
-        }
-        else
-            Log.d("MAIN", "updateWeathers: weathers = null");
-
-    }
 }

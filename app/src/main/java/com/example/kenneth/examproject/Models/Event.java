@@ -11,6 +11,10 @@ public class Event {
     private String id;
     private String Name;
     private String StartTime;
+
+
+
+    private String EndTime;
     private String Descrition;
     private String Address;
     private double Longitude;
@@ -45,6 +49,10 @@ public class Event {
         return Descrition;
     }
 
+    public String getEndTime() {return EndTime;}
+
+    public void setEndTime(String endTime) {EndTime = endTime;}
+
     public void setDescrition(String descrition) {
         Descrition = descrition;
     }
@@ -61,7 +69,7 @@ public class Event {
         return Longitude;
     }
 
-    public void setLongitude(float longitude) {
+    public void setLongitude(double longitude) {
         Longitude = longitude;
     }
 
@@ -69,7 +77,7 @@ public class Event {
         return Latitude;
     }
 
-    public void setLatitude(float latitude) {
+    public void setLatitude(double latitude) {
         Latitude = latitude;
     }
 

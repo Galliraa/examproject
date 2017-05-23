@@ -1,18 +1,18 @@
 package com.example.kenneth.examproject.Adapters;
 
 import android.content.Context;
-import android.content.res.Resources;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
-import android.support.v7.app.AppCompatActivity;
+import android.view.ViewGroup;
 
 import com.example.kenneth.examproject.DayFragment;
 import com.example.kenneth.examproject.MonthFragment;
 import com.example.kenneth.examproject.R;
 import com.example.kenneth.examproject.WeekFragment;
 
-import static com.example.kenneth.examproject.R.string.dayTitle;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Created by Kenneth on 16-05-2017.
@@ -26,9 +26,33 @@ public class PageAdapter extends FragmentPagerAdapter {
 
     private Context context;
 
+    private Map<Integer,String> fragmentTags;
+    private FragmentManager fm;
+
     public PageAdapter(FragmentManager fragmentManager, Context c) {
         super(fragmentManager);
         context = c;
+        fm = fragmentManager;
+        fragmentTags = new HashMap<Integer,String>();
+    }
+
+    @Override
+    public Object instantiateItem(ViewGroup container, int position) {
+        Object obj = super.instantiateItem(container, position);
+        if (obj instanceof Fragment) {
+            // record the fragment tag here.
+            Fragment f = (Fragment) obj;
+            String tag = f.getTag();
+            fragmentTags.put(position, tag);
+        }
+        return obj;
+    }
+
+    public Fragment getFragment(int position) {
+        String tag = fragmentTags.get(position);
+        if (tag == null)
+            return null;
+        return fm.findFragmentByTag(tag);
     }
 
     // Returns total number of pages

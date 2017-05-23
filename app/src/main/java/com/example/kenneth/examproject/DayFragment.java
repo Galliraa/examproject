@@ -11,17 +11,20 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 
 import com.example.kenneth.examproject.Adapters.DayListAdapter;
+import com.example.kenneth.examproject.DatabaseHelpers.DatabaseHelper;
 import com.example.kenneth.examproject.Interfaces.EventSelectorInterface;
 import com.example.kenneth.examproject.Models.Event;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.List;
 
 public class DayFragment extends Fragment {
 
     private ListView eventListView;
     private DayListAdapter dayListAdapter;
-    private ArrayList<Event> events;
+    private List<Event> events;
+    private DatabaseHelper database;
 
     private EventSelectorInterface eventSelector;
 
@@ -31,11 +34,15 @@ public class DayFragment extends Fragment {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_day, container, false);
         eventListView = (ListView) view.findViewById(R.id.eventLV);
+        //database = new DatabaseHelper(getActivity().getApplicationContext());
+        dayListAdapter = new DayListAdapter(getActivity(), events);
+        eventListView.setAdapter(dayListAdapter);
         updateEvents();
         return view;
     }
 
 
+    // in this must be implemented sorting by date
     public void updateEvents(){
         if(eventSelector != null)
         {
@@ -43,24 +50,30 @@ public class DayFragment extends Fragment {
         }
         if (events != null)
         {
-            dayListAdapter = new DayListAdapter(getActivity(), events);
+            dayListAdapter = new DayListAdapter(getActivity().getApplicationContext(), events);
             eventListView.setAdapter(dayListAdapter);
 
             eventListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 @Override
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                    onSongSelected(position);
+                    onEventSelected(position);
 
                 }
             });
         }
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        updateEvents();
+    }
+
     public void setEvents(ArrayList<Event> eventList){
         events = (ArrayList<Event>) eventList.clone();
     }
 
-    private void onSongSelected(int position) {
+    private void onEventSelected(int position) {
         if(eventSelector !=null) {
             eventSelector.onEventSelected(position);
         }
