@@ -19,7 +19,7 @@ public class Event {
     private String Address;
     private double Longitude;
     private double Latitude;
-    private Bitmap EventImage;
+    private String EventImage;
 
     public String getId() {
         return id;
@@ -81,11 +81,11 @@ public class Event {
         Latitude = latitude;
     }
 
-    public Bitmap getEventImage() {
+    public String getEventImage() {
         return EventImage;
     }
 
-    public void setEventImage(Bitmap eventImage) {
+    public void setEventImage(String eventImage) {
         EventImage = eventImage;
     }
 }
