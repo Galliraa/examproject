@@ -31,7 +31,8 @@ public final class EventDatabaseContract {
         public static final String COLUMN_EVENT_ID = "eventid";
         public static final String COLUMN_LONGITUDE = "longitude";
         public static final String COLUMN_LATITUDE = "latitude";
-        public static final String COLUMN_IMAGE = "image";
+        public static final String COLUMN_URL = "url";
+        public static final String COLUMN_END_TIME = "end_time";
 
 
 
@@ -40,12 +41,13 @@ public final class EventDatabaseContract {
                 COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
                 COLUMN_NAME + TEXT_TYPE + COMMA_SEP +
                 COLUMN_START_TIME + TEXT_TYPE + COMMA_SEP +
+                COLUMN_END_TIME + TEXT_TYPE + COMMA_SEP +
                 COLUMN_DESC + TEXT_TYPE + COMMA_SEP +
                 COLUMN_ADDRESS + TEXT_TYPE + COMMA_SEP +
                 COLUMN_EVENT_ID + TEXT_TYPE + COMMA_SEP +
                 COLUMN_LONGITUDE + LONG_TYPE + COMMA_SEP +
                 COLUMN_LATITUDE + LONG_TYPE + COMMA_SEP +
-                COLUMN_IMAGE + IMAGE_TYPE + " )";
+                COLUMN_URL + TEXT_TYPE + " )";
 
         public static final String DELETE_TABLE = "DROP TABLE IF EXISTS " + TABLE_NAME;
     }

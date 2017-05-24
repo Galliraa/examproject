@@ -1,9 +1,11 @@
 package com.example.kenneth.examproject;
 
+import android.graphics.Bitmap;
 import android.support.v4.app.Fragment;
 import android.content.Context;
 import android.os.Bundle;
 
+import android.support.v4.util.LruCache;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,6 +14,10 @@ import android.widget.ImageView;
 import android.widget.ScrollView;
 import android.widget.TextView;
 
+import com.android.volley.RequestQueue;
+import com.android.volley.toolbox.ImageLoader;
+import com.android.volley.toolbox.NetworkImageView;
+import com.android.volley.toolbox.Volley;
 import com.example.kenneth.examproject.Interfaces.EventSelectorInterface;
 import com.example.kenneth.examproject.Models.Event;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -33,7 +39,9 @@ public class DetailsFragment extends Fragment implements OnMapReadyCallback{
     private TextView timeTV;
     private TextView addressTV;
     private TextView descTV;
-    private ImageView eventIV;
+    private NetworkImageView eventIV;
+    private ImageLoader mImageLoader;
+    private RequestQueue mRequestQueue;
     private ScrollView scrollView;
 
     private double eventLattitude;
@@ -57,7 +65,20 @@ public class DetailsFragment extends Fragment implements OnMapReadyCallback{
         timeTV = (TextView) view.findViewById(R.id.eventTimeTV);
         addressTV = (TextView) view.findViewById(R.id.eventAddressTV);
         descTV = (TextView) view.findViewById(R.id.eventDescTV);
-        eventIV = (ImageView) view.findViewById(R.id.eventIV);
+        eventIV = (NetworkImageView) view.findViewById(R.id.eventIV);
+
+        mRequestQueue = Volley.newRequestQueue(getContext());
+        mImageLoader = new ImageLoader(mRequestQueue, new ImageLoader.ImageCache() {
+            private final LruCache<String, Bitmap> mCache = new LruCache<String, Bitmap>(10);
+
+            public void putBitmap(String url, Bitmap bitmap) {
+                mCache.put(url, bitmap);
+            }
+
+            public Bitmap getBitmap(String url) {
+                return mCache.get("url");
+            }
+        });
         scrollView = (ScrollView) view.findViewById(R.id.scrollView);
         updateEvents();
         setUpMap();
@@ -99,7 +120,7 @@ public class DetailsFragment extends Fragment implements OnMapReadyCallback{
                 nameTV.setText(event.getName());
                 addressTV.setText(event.getAddress());
                 descTV.setText(event.getDescrition());
-                eventIV.setImageBitmap(event.getEventImage());
+                eventIV.setImageUrl(event.getEventImage(), mImageLoader);
 
                 eventLattitude = event.getLatitude();
                 eventLongitude = event.getLongitude();

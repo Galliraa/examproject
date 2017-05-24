@@ -8,17 +8,17 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.GridView;
-import android.widget.ListView;
 
 import com.example.kenneth.examproject.Adapters.WeekListAdapter;
 import com.example.kenneth.examproject.Interfaces.EventSelectorInterface;
+import com.example.kenneth.examproject.Interfaces.ForceUiUpdateInterface;
 import com.example.kenneth.examproject.Models.Event;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 
-public class WeekFragment extends Fragment {
+public class WeekFragment extends Fragment implements ForceUiUpdateInterface {
 
 
     private GridView eventListView;
@@ -33,7 +33,6 @@ public class WeekFragment extends Fragment {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_week, container, false);
         eventListView = (GridView) view.findViewById(R.id.EventGV);
-        updateEvents();
         return view;
     }
 
@@ -57,7 +56,7 @@ public class WeekFragment extends Fragment {
             eventListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 @Override
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                    onSongSelected(position);
+                    onEventSelected(position);
 
                 }
             });
@@ -68,7 +67,7 @@ public class WeekFragment extends Fragment {
         events = (ArrayList<Event>) eventList.clone();
     }
 
-    private void onSongSelected(int position) {
+    private void onEventSelected(int position) {
         if(eventSelector !=null) {
             eventSelector.onEventSelected(position);
         }

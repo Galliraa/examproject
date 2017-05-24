@@ -3,6 +3,7 @@ package com.example.kenneth.examproject.Services;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.os.AsyncTask;
 import android.os.Binder;
 import android.os.Bundle;
@@ -12,6 +13,11 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.text.TextUtils;
 import android.util.Log;
 
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.toolbox.ImageLoader;
+import com.android.volley.toolbox.ImageRequest;
+import com.android.volley.toolbox.Volley;
 import com.example.kenneth.examproject.DatabaseHelpers.DatabaseHelper;
 import com.example.kenneth.examproject.Models.Event;
 import com.facebook.AccessToken;
@@ -23,6 +29,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.lang.annotation.Target;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Timer;
@@ -136,6 +143,7 @@ class getEventTask extends AsyncTask<Void,Void,Void> {
 
     private List<String> IDList = new ArrayList<String>();
     private List <String> eventIDs = new ArrayList <String>();
+    private List <String> imageURLs = new ArrayList <String>();
 
     public getEventTask(Context context, DatabaseHelper database){
         this._context = context;
@@ -222,7 +230,7 @@ class getEventTask extends AsyncTask<Void,Void,Void> {
         long unixTime = System.currentTimeMillis() / 1000L;
         final Bundle params = new Bundle(2);
         params.putString("ids", TextUtils.join(",", IDList));
-        params.putString("fields", "events.fields(name,id).since(" + unixTime + ")");
+        params.putString("fields", "events.fields(name,id,cover).since(" + unixTime + ")");
 
         new GraphRequest(
                 AccessToken.getCurrentAccessToken(),
@@ -244,7 +252,13 @@ class getEventTask extends AsyncTask<Void,Void,Void> {
                                         dataArray = ID.getJSONObject(IDList.get(i)).getJSONObject("events").getJSONArray("data");
 
                                         for (int j = 0; j < dataArray.length(); j++)
+                                        {
                                             eventIDs.add(dataArray.getJSONObject(j).getString("id"));
+                                            if (dataArray.getJSONObject(j).has("cover"))
+                                                imageURLs.add(dataArray.getJSONObject(j).getJSONObject("cover").getString("source"));
+                                            else
+                                                imageURLs.add(null);
+                                        }
                                     }
                                 }
 
@@ -298,6 +312,7 @@ class getEventTask extends AsyncTask<Void,Void,Void> {
                                 event.setName(name);
                                 event.setLatitude(latitude);
                                 event.setLongitude(longitude);
+                                event.setEventImage(imageURLs.get(1));
                                 _database.addEvent(event);
 
                                 Log.d("onCompleted", "got event data");

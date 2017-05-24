@@ -1,15 +1,20 @@
 package com.example.kenneth.examproject;
 
+import android.graphics.Bitmap;
 import android.support.v4.app.Fragment;
 import android.content.Context;
 import android.os.Bundle;
 
+import android.support.v4.util.LruCache;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
 
+import com.android.volley.RequestQueue;
+import com.android.volley.toolbox.ImageLoader;
+import com.android.volley.toolbox.Volley;
 import com.example.kenneth.examproject.Adapters.DayListAdapter;
 import com.example.kenneth.examproject.DatabaseHelpers.DatabaseHelper;
 import com.example.kenneth.examproject.Interfaces.EventSelectorInterface;
@@ -34,9 +39,11 @@ public class DayFragment extends Fragment {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_day, container, false);
         eventListView = (ListView) view.findViewById(R.id.eventLV);
+
         //database = new DatabaseHelper(getActivity().getApplicationContext());
         dayListAdapter = new DayListAdapter(getActivity(), events);
         eventListView.setAdapter(dayListAdapter);
+
         updateEvents();
         return view;
     }
@@ -50,7 +57,7 @@ public class DayFragment extends Fragment {
         }
         if (events != null)
         {
-            dayListAdapter = new DayListAdapter(getActivity().getApplicationContext(), events);
+            dayListAdapter = new DayListAdapter(getActivity().getBaseContext(), events);
             eventListView.setAdapter(dayListAdapter);
 
             eventListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {

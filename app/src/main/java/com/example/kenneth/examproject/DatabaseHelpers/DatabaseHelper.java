@@ -6,7 +6,6 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 
 
 import com.example.kenneth.examproject.Models.Event;
@@ -17,13 +16,14 @@ import java.util.Vector;
 
 import static com.example.kenneth.examproject.Contracts.EventDatabaseContract.DATABASE_NAME;
 import static com.example.kenneth.examproject.Contracts.EventDatabaseContract.DATABASE_VERSION;
+import static com.example.kenneth.examproject.Contracts.EventDatabaseContract.Table1.COLUMN_END_TIME;
 import static com.example.kenneth.examproject.Contracts.EventDatabaseContract.Table1.COLUMN_EVENT_ID;
 import static com.example.kenneth.examproject.Contracts.EventDatabaseContract.Table1.COLUMN_LATITUDE;
 import static com.example.kenneth.examproject.Contracts.EventDatabaseContract.Table1.COLUMN_LONGITUDE;
 import static com.example.kenneth.examproject.Contracts.EventDatabaseContract.Table1.COLUMN_START_TIME;
 import static com.example.kenneth.examproject.Contracts.EventDatabaseContract.Table1.COLUMN_DESC;
 import static com.example.kenneth.examproject.Contracts.EventDatabaseContract.Table1.COLUMN_ID;
-import static com.example.kenneth.examproject.Contracts.EventDatabaseContract.Table1.COLUMN_IMAGE;
+import static com.example.kenneth.examproject.Contracts.EventDatabaseContract.Table1.COLUMN_URL;
 import static com.example.kenneth.examproject.Contracts.EventDatabaseContract.Table1.COLUMN_NAME;
 import static com.example.kenneth.examproject.Contracts.EventDatabaseContract.Table1.COLUMN_ADDRESS;
 import static com.example.kenneth.examproject.Contracts.EventDatabaseContract.Table1.CREATE_TABLE;
@@ -78,15 +78,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public void addEvent(Event event){
 
         ContentValues values = new ContentValues();
-        Bitmap bmp = event.getEventImage();
-        if (bmp!=null) {
-            ByteArrayOutputStream stream = new ByteArrayOutputStream();
-            bmp.compress(Bitmap.CompressFormat.PNG, 100, stream);
-            byte[] byteArray = stream.toByteArray();
-            values.put(COLUMN_IMAGE, byteArray);
-        }
 
         values.put(COLUMN_START_TIME, event.getStartTime());
+        values.put(COLUMN_URL, event.getEventImage());
+        values.put(COLUMN_END_TIME, event.getEndTime());
         values.put(COLUMN_DESC, event.getDescrition());
         values.put(COLUMN_NAME, event.getName());
         values.put(COLUMN_ADDRESS, event.getAddress());
@@ -138,8 +133,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 temp.setStartTime(c.getString(c.getColumnIndex(COLUMN_START_TIME)));
                 temp.setLongitude(c.getFloat(c.getColumnIndex(COLUMN_LONGITUDE)));
                 temp.setLatitude(c.getFloat(c.getColumnIndex(COLUMN_LATITUDE)));
+                temp.setEndTime(c.getString(c.getColumnIndex(COLUMN_END_TIME)));
+                temp.setEventImage(c.getString(c.getColumnIndex(COLUMN_URL)));
 
-                //byte[] byteArray = c.getBlob(c.getColumnIndex(COLUMN_IMAGE));
+                //byte[] byteArray = c.getBlob(c.getColumnIndex(COLUMN_URL));
                 //Bitmap bitmap = BitmapFactory.decodeByteArray(byteArray, 0, byteArray.length);
                 //temp.setEventImage(bitmap);
                 events.add(events.size(), temp);
