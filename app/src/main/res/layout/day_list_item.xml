@@ -10,7 +10,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:srcCompat="@android:drawable/ic_menu_report_image"
-        android:layout_weight="0.27"
+        android:layout_weight="1"
         android:layout_alignParentTop="true"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true" />

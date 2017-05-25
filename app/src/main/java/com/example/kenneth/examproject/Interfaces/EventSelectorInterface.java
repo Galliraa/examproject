@@ -11,5 +11,7 @@ import java.util.List;
 public interface EventSelectorInterface {
     public void onEventSelected(int position);
     public List<Event> getEventList();
+    public List<Event> getEventListDay();
+    public List<Event> getEventListWeek();
     public Event getCurrentSelection();
 }

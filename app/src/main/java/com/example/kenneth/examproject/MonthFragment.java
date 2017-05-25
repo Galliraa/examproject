@@ -40,9 +40,9 @@ public class MonthFragment extends Fragment implements ForceUiUpdateInterface {
     @Override
     public void onResume() {
         super.onResume();
-        updateEvents();
     }
 
+    // in this must be implemented sorting by date
     public void updateEvents(){
         if(eventSelector != null)
         {
@@ -50,7 +50,7 @@ public class MonthFragment extends Fragment implements ForceUiUpdateInterface {
         }
         if (events != null)
         {
-            monthListAdapter = new MonthListAdapter(getActivity(), events);
+            monthListAdapter = new MonthListAdapter(getActivity().getBaseContext(), events);
             eventListView.setAdapter(monthListAdapter);
 
             eventListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -85,6 +85,7 @@ public class MonthFragment extends Fragment implements ForceUiUpdateInterface {
 
         try {
             eventSelector = (EventSelectorInterface) context;
+            //updateEvents();
         }catch (ClassCastException ex)
         {
             throw new ClassCastException(context.toString() + " must implement EventSelectorInterface");

@@ -39,18 +39,17 @@ public class WeekFragment extends Fragment implements ForceUiUpdateInterface {
     @Override
     public void onResume() {
         super.onResume();
-        updateEvents();
-
     }
 
+    // in this must be implemented sorting by date
     public void updateEvents(){
         if(eventSelector != null)
         {
-            events = eventSelector.getEventList();
+            events = eventSelector.getEventListWeek();
         }
         if (events != null)
         {
-            weekListAdapter = new WeekListAdapter(getActivity(), events);
+            weekListAdapter = new WeekListAdapter(getActivity().getBaseContext(), events);
             eventListView.setAdapter(weekListAdapter);
 
             eventListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -85,10 +84,12 @@ public class WeekFragment extends Fragment implements ForceUiUpdateInterface {
 
         try {
             eventSelector = (EventSelectorInterface) context;
+            updateEvents();
         }catch (ClassCastException ex)
         {
             throw new ClassCastException(context.toString() + " must implement EventSelectorInterface");
         }
+
     }
 
     @Override

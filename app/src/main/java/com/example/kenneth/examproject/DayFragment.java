@@ -18,18 +18,18 @@ import com.android.volley.toolbox.Volley;
 import com.example.kenneth.examproject.Adapters.DayListAdapter;
 import com.example.kenneth.examproject.DatabaseHelpers.DatabaseHelper;
 import com.example.kenneth.examproject.Interfaces.EventSelectorInterface;
+import com.example.kenneth.examproject.Interfaces.ForceUiUpdateInterface;
 import com.example.kenneth.examproject.Models.Event;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DayFragment extends Fragment {
+public class DayFragment extends Fragment implements ForceUiUpdateInterface {
 
     private ListView eventListView;
     private DayListAdapter dayListAdapter;
     private List<Event> events;
-    private DatabaseHelper database;
 
     private EventSelectorInterface eventSelector;
 
@@ -39,12 +39,6 @@ public class DayFragment extends Fragment {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_day, container, false);
         eventListView = (ListView) view.findViewById(R.id.eventLV);
-
-        //database = new DatabaseHelper(getActivity().getApplicationContext());
-        dayListAdapter = new DayListAdapter(getActivity(), events);
-        eventListView.setAdapter(dayListAdapter);
-
-        updateEvents();
         return view;
     }
 
@@ -53,7 +47,7 @@ public class DayFragment extends Fragment {
     public void updateEvents(){
         if(eventSelector != null)
         {
-            events = eventSelector.getEventList();
+            events = eventSelector.getEventListDay();
         }
         if (events != null)
         {
@@ -73,7 +67,6 @@ public class DayFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        updateEvents();
     }
 
     public void setEvents(ArrayList<Event> eventList){
@@ -98,6 +91,7 @@ public class DayFragment extends Fragment {
 
         try {
             eventSelector = (EventSelectorInterface) context;
+            updateEvents();
         }catch (ClassCastException ex)
         {
             throw new ClassCastException(context.toString() + " must implement EventSelectorInterface");

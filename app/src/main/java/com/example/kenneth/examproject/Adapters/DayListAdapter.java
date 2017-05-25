@@ -27,10 +27,10 @@ import static com.example.kenneth.examproject.R.id.parent;
 
 public class DayListAdapter extends BaseAdapter {
 
-    Context context;
-    List<Event> events;
-    Event event = null;
-    NetworkImageView imageView;
+    private Context context;
+    private List<Event> events;
+    private Event event = null;
+    private NetworkImageView imageView;
     private ImageLoader mImageLoader;
     private RequestQueue mRequestQueue;
 
@@ -91,10 +91,10 @@ public class DayListAdapter extends BaseAdapter {
             //eventImageView.setImageBitmap(event.getEventImage());
 
             TextView nameView = (TextView) convertView.findViewById(R.id.eventNameTV);
-            nameView.setText(event.getName().toString());
+            nameView.setText(event.getName());
 
             TextView dateView = (TextView) convertView.findViewById(R.id.eventDateTV);
-            dateView.setText(event.getStartTime().toString());
+            dateView.setText(event.getStartTime());
 
             TextView descView = (TextView) convertView.findViewById(R.id.eventDescTV);
             String s = event.getDescrition().substring(0,100);

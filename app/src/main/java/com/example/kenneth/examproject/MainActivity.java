@@ -27,13 +27,16 @@ import com.example.kenneth.examproject.Interfaces.ForceUiUpdateInterface;
 import com.example.kenneth.examproject.Models.Event;
 import com.example.kenneth.examproject.Services.EventService;
 
+import java.util.Calendar;
 import java.util.List;
+import java.util.Vector;
 
 
 // sources:
 // https://github.com/codepath/android_guides/wiki/ViewPager-with-FragmentPagerAdapter
 
 public class MainActivity extends AppCompatActivity implements EventSelectorInterface{
+
 
     @Override
     public void onEventSelected(int position) {
@@ -53,8 +56,44 @@ public class MainActivity extends AppCompatActivity implements EventSelectorInte
     }
 
     @Override
+    public List<Event> getEventListDay() {
+        if(events != null) {
+            List<Event> list = new Vector<>();
+            Calendar c = Calendar.getInstance();
+            int j = 0;
+            for (int i = 0; i < events.size(); i++) {
+                if (!events.get(i).getStartTime().toString().substring(0, 10).equals(c.get(Calendar.YEAR) + "-" + c.get(Calendar.MONTH) + "-" + c.get(Calendar.DATE)))
+                    return list;
+                list.add(j, events.get(i));
+            }
+        }
+        return events;
+    }
+
+    @Override
+    public List<Event> getEventListWeek() {
+        if(events != null) {
+            List<Event> list = new Vector<>();
+            Calendar c = Calendar.getInstance();
+            int j = 0;
+            int t = Integer.parseInt(events.get(0).getStartTime().toString().substring(9, 10));
+            int f = (c.get(Calendar.DATE)+7);
+            for (int i = 0; i < events.size(); i++) {
+                if (Integer.parseInt(events.get(i).getStartTime().toString().substring(9, 10)) > (c.get(Calendar.DATE)+7) || Integer.parseInt(events.get(i).getStartTime().toString().substring(6, 7)) != (c.get(Calendar.MONTH)))
+                    return list;
+                list.add(j, events.get(i));
+            }
+        }
+        return events;
+    }
+
+
+    @Override
     public Event getCurrentSelection() {
-        return null;
+        if(events != null)
+            return events.get(selectedEventIndex);
+        else
+            return null;
     }
 
     private enum PhoneMode {PORTRAIT, LANDSCAPE}
@@ -70,7 +109,6 @@ public class MainActivity extends AppCompatActivity implements EventSelectorInte
 
     private DetailsFragment eventDetails;
     private List<Event> events;
-    private DatabaseHelper db;
 
     private PhoneMode phoneMode;
     private UserMode userMode;
@@ -85,20 +123,19 @@ public class MainActivity extends AppCompatActivity implements EventSelectorInte
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_views);
 
-        db = new DatabaseHelper(getApplicationContext());
-
         final ConnectivityManager cm =
                 (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
 
         setupConnectionToEventService();
-        startEventService();
         bindToEventService();
 
         vpPager = (ViewPager) findViewById(R.id.list_container);
         adapterViewPager = new PageAdapter(getSupportFragmentManager(), getApplicationContext());
         vpPager.setAdapter(adapterViewPager);
-
+        vpPager.setOffscreenPageLimit(1);
         detailsContainer = (LinearLayout)findViewById(R.id.details_container);
+
+
 
         //load Events from web
         //movies = new MovieLoader(this).getMovieList();
@@ -127,6 +164,7 @@ public class MainActivity extends AppCompatActivity implements EventSelectorInte
         } else {
             //got restarted, probably due to orientation change
 
+            events = eventService.getAllEvents();
             selectedEventIndex = savedInstanceState.getInt("event_position");
             userMode = (UserMode) savedInstanceState.getSerializable("user_mode");
 
@@ -150,6 +188,7 @@ public class MainActivity extends AppCompatActivity implements EventSelectorInte
                 public void onPageSelected(int position) {
                     Toast.makeText(MainActivity.this,
                             "Selected page position: " + position, Toast.LENGTH_SHORT).show();
+                    bindToEventService();
                     Fragment fragment = ((PageAdapter)vpPager.getAdapter()).getFragment(position);
 
                     if (fragment != null)
@@ -210,6 +249,7 @@ public class MainActivity extends AppCompatActivity implements EventSelectorInte
         }
 
     }
+
 
     @Override
     protected void onStart() {
@@ -276,7 +316,7 @@ public class MainActivity extends AppCompatActivity implements EventSelectorInte
 
     private void bindToEventService(){
         bindService(new Intent(MainActivity.this,
-                EventService.class), eventServiceConnection, Context.BIND_ABOVE_CLIENT);
+                EventService.class), eventServiceConnection, Context.BIND_AUTO_CREATE);
     }
 
     private void unbindFromEventService(){

@@ -1,5 +1,6 @@
 package com.example.kenneth.examproject;
 
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.support.v4.app.Fragment;
 import android.content.Context;
@@ -19,6 +20,7 @@ import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.NetworkImageView;
 import com.android.volley.toolbox.Volley;
 import com.example.kenneth.examproject.Interfaces.EventSelectorInterface;
+import com.example.kenneth.examproject.Interfaces.ForceUiUpdateInterface;
 import com.example.kenneth.examproject.Models.Event;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -33,7 +35,7 @@ import java.lang.reflect.Field;
 /**
 
  */
-public class DetailsFragment extends Fragment implements OnMapReadyCallback{
+public class DetailsFragment extends Fragment implements OnMapReadyCallback {
 
     private TextView nameTV;
     private TextView dateTV;
@@ -87,12 +89,15 @@ public class DetailsFragment extends Fragment implements OnMapReadyCallback{
         return view;
     }
 
+
+
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
 
         try {
             eventSelector = (EventSelectorInterface) context;
+            updateEvents();
         }catch (ClassCastException ex)
         {
             throw new ClassCastException(context.toString() + " must implement EventSelectorInterface");

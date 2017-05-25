@@ -63,6 +63,15 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         onCreate(sqLiteDatabase);
     }
 
+    public void deleteAll()
+    {
+        SQLiteDatabase db = this.getWritableDatabase();
+        // db.delete(TABLE_NAME,null,null);
+        db.execSQL("delete from "+ TABLE_NAME);
+        //db.execSQL("TRUNCATE table" + TABLE_NAME);
+        db.close();
+    }
+
     public static synchronized DatabaseHelper getInstance(Context context) {
 
         // Use the application context, which will ensure that you
@@ -101,6 +110,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             c.moveToFirst();
             deleteEventFromDatabase(c.getInt(c.getColumnIndex(COLUMN_ID)));
         }
+       // c.close();
         db.close();
     }
 
@@ -117,8 +127,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         String query = "SELECT * FROM " + TABLE_NAME + " WHERE 1";
 
         //cursor point to a location in your results
-        Cursor c = db.rawQuery(query,null);
-
+       // Cursor c = db.rawQuery(query,null);
+        Cursor c = db.query(TABLE_NAME, null, null, null, null, null, COLUMN_START_TIME+" DESC");
         //move to taskId row
         c.moveToLast();
 
