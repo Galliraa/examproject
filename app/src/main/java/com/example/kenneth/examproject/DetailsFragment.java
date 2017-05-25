@@ -12,8 +12,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.ScrollView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.ImageLoader;
@@ -26,7 +26,6 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.OnMapReadyCallback;
-import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
@@ -45,9 +44,10 @@ public class DetailsFragment extends Fragment implements OnMapReadyCallback {
     private NetworkImageView eventIV;
     private ImageLoader mImageLoader;
     private RequestQueue mRequestQueue;
+    private ScrollView scrollView;
 
-    private double latti = 56.16984751;
-    private double longi = 10.20561455;
+    private double eventLattitude;
+    private double eventLongitude;
 
     private GoogleMap eMap;
 
@@ -81,7 +81,8 @@ public class DetailsFragment extends Fragment implements OnMapReadyCallback {
                 return mCache.get("url");
             }
         });
-       // updateEvents();
+        scrollView = (ScrollView) view.findViewById(R.id.scrollView);
+        updateEvents();
         setUpMap();
 
         Log.d("DETAILSFRAGMENT", "onCreateView: Called");
@@ -104,6 +105,11 @@ public class DetailsFragment extends Fragment implements OnMapReadyCallback {
         }
     }
 
+    @Override
+    public void onStart() {
+        super.onStart();
+    }
+
     public void updateEvents(){
         if(eventSelector != null)
         {
@@ -115,10 +121,25 @@ public class DetailsFragment extends Fragment implements OnMapReadyCallback {
     {
         if(nameTV !=null && dateTV != null && timeTV != null)
         {
-            nameTV.setText(event.getName());
-            addressTV.setText(event.getAddress());
-            descTV.setText(event.getDescrition());
-            eventIV.setImageUrl(event.getEventImage(), mImageLoader);
+            try {
+                nameTV.setText(event.getName());
+                addressTV.setText(event.getAddress());
+                descTV.setText(event.getDescrition());
+                eventIV.setImageUrl(event.getEventImage(), mImageLoader);
+
+                eventLattitude = event.getLatitude();
+                eventLongitude = event.getLongitude();
+
+                if (eMap != null) {
+                    eMap.addMarker(new MarkerOptions().position(new LatLng(event.getLatitude(), event.getLongitude())).title(event.getName()));
+                    eMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
+                            new LatLng(event.getLatitude(), event.getLongitude()), 12));
+                }
+            }
+            catch(NullPointerException e)
+            {
+                Log.d("EXCEPTION", "setEvent: " + e.getMessage());
+            }
         }
     }
 
@@ -147,22 +168,22 @@ public class DetailsFragment extends Fragment implements OnMapReadyCallback {
         eMap = googleMap;
         // Check if we were successful in obtaining the map.
         if (eMap != null) {
-            eMap.addMarker(new MarkerOptions().position(new LatLng(latti, longi)).title("You are here!"));
-            zoomToUser();
+
         }
 
     }
 
-    public void setUpMap(){
-        if (eMap == null){
-            ((SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.MapFragment))
-                    .getMapAsync(this);
+    public void setUpMap() {
+        if (eMap == null) {
+            EventMapFragment eventMapFragment = (EventMapFragment) getChildFragmentManager().findFragmentById(R.id.MapFragment);
+            eventMapFragment.getMapAsync(this);
+            eventMapFragment.setListener(new EventMapFragment.OnTouchListener() {
+                @Override
+                public void onTouch() {
+                    scrollView.requestDisallowInterceptTouchEvent(true);
+                }
+            });
+
         }
-    }
-
-    private void zoomToUser(){
-
-            eMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
-                    new LatLng(latti, longi), 12));
     }
 }
