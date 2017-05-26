@@ -49,18 +49,18 @@ public class DayFragment extends Fragment implements ForceUiUpdateInterface {
         {
             events = eventSelector.getEventListDay();
         }
-        if (events != null)
-        {
+        if (events != null) {
             dayListAdapter = new DayListAdapter(getActivity().getBaseContext(), events);
-            eventListView.setAdapter(dayListAdapter);
+            if (eventListView != null) {
+                eventListView.setAdapter(dayListAdapter);
+                eventListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                    @Override
+                    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                        onEventSelected(position);
 
-            eventListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                @Override
-                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                    onEventSelected(position);
-
-                }
-            });
+                    }
+                });
+            }
         }
     }
 
@@ -91,7 +91,6 @@ public class DayFragment extends Fragment implements ForceUiUpdateInterface {
 
         try {
             eventSelector = (EventSelectorInterface) context;
-            updateEvents();
         }catch (ClassCastException ex)
         {
             throw new ClassCastException(context.toString() + " must implement EventSelectorInterface");

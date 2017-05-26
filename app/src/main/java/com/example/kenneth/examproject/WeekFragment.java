@@ -84,7 +84,6 @@ public class WeekFragment extends Fragment implements ForceUiUpdateInterface {
 
         try {
             eventSelector = (EventSelectorInterface) context;
-            updateEvents();
         }catch (ClassCastException ex)
         {
             throw new ClassCastException(context.toString() + " must implement EventSelectorInterface");

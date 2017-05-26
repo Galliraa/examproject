@@ -3,6 +3,7 @@ package com.example.kenneth.examproject;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,6 +21,7 @@ import java.util.List;
 
 public class MonthFragment extends Fragment implements ForceUiUpdateInterface {
 
+    private final static String MONTH_TAG = "ONRESUME MONTH";
 
     private ListView eventListView;
     private MonthListAdapter monthListAdapter;
@@ -40,6 +42,7 @@ public class MonthFragment extends Fragment implements ForceUiUpdateInterface {
     @Override
     public void onResume() {
         super.onResume();
+        Log.d(MONTH_TAG, "onResmue Month: update");
     }
 
     // in this must be implemented sorting by date
@@ -85,7 +88,6 @@ public class MonthFragment extends Fragment implements ForceUiUpdateInterface {
 
         try {
             eventSelector = (EventSelectorInterface) context;
-            //updateEvents();
         }catch (ClassCastException ex)
         {
             throw new ClassCastException(context.toString() + " must implement EventSelectorInterface");

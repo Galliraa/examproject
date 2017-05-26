@@ -21,7 +21,6 @@ import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.example.kenneth.examproject.Adapters.PageAdapter;
-import com.example.kenneth.examproject.DatabaseHelpers.DatabaseHelper;
 import com.example.kenneth.examproject.Interfaces.EventSelectorInterface;
 import com.example.kenneth.examproject.Interfaces.ForceUiUpdateInterface;
 import com.example.kenneth.examproject.Models.Event;
@@ -37,6 +36,8 @@ import java.util.Vector;
 
 public class MainActivity extends AppCompatActivity implements EventSelectorInterface{
 
+    private final static String EVENT_TAG = "EVENT";
+    private final static String RESUME_TAG = "ONRESUME";
 
     @Override
     public void onEventSelected(int position) {
@@ -76,13 +77,15 @@ public class MainActivity extends AppCompatActivity implements EventSelectorInte
             List<Event> list = new Vector<>();
             Calendar c = Calendar.getInstance();
             int j = 0;
-            int t = Integer.parseInt(events.get(0).getStartTime().toString().substring(9, 10));
-            int f = (c.get(Calendar.DATE)+7);
             for (int i = 0; i < events.size(); i++) {
-                if (Integer.parseInt(events.get(i).getStartTime().toString().substring(9, 10)) > (c.get(Calendar.DATE)+7) || Integer.parseInt(events.get(i).getStartTime().toString().substring(6, 7)) != (c.get(Calendar.MONTH)))
-                    return list;
-                list.add(j, events.get(i));
-            }
+                if (Integer.parseInt(events.get(i).getStartTime().toString().substring(9, 10)) > (c.get(Calendar.DATE)+7) || Integer.parseInt(events.get(i).getStartTime().toString().substring(6, 7)) != (c.get(Calendar.MONTH))) {
+                    if (i == 0)
+                        return null;
+                    else
+                        return list;
+                }
+                    list.add(j, events.get(i));
+                }
         }
         return events;
     }
@@ -104,7 +107,6 @@ public class MainActivity extends AppCompatActivity implements EventSelectorInte
     FragmentPagerAdapter adapterViewPager;
 
 
-    private ServiceConnection eventServiceConnection;
     private EventService eventService;
 
     private DetailsFragment eventDetails;
@@ -114,6 +116,8 @@ public class MainActivity extends AppCompatActivity implements EventSelectorInte
     private UserMode userMode;
 
     private int selectedEventIndex;
+
+    private boolean isBound;
 
     private ViewPager vpPager;
     private LinearLayout detailsContainer;
@@ -126,8 +130,7 @@ public class MainActivity extends AppCompatActivity implements EventSelectorInte
         final ConnectivityManager cm =
                 (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
 
-        setupConnectionToEventService();
-        bindToEventService();
+
 
         vpPager = (ViewPager) findViewById(R.id.list_container);
         adapterViewPager = new PageAdapter(getSupportFragmentManager(), getApplicationContext());
@@ -149,7 +152,10 @@ public class MainActivity extends AppCompatActivity implements EventSelectorInte
 
         if(savedInstanceState == null) {
 
-            selectedEventIndex = 1;
+            //setupConnectionToEventService();
+            //bindToEventService();
+
+            selectedEventIndex = 0;
 
             eventDetails = new DetailsFragment();
 
@@ -164,7 +170,10 @@ public class MainActivity extends AppCompatActivity implements EventSelectorInte
         } else {
             //got restarted, probably due to orientation change
 
-            events = eventService.getAllEvents();
+            //setupConnectionToEventService();
+            //bindToEventService();
+
+
             selectedEventIndex = savedInstanceState.getInt("event_position");
             userMode = (UserMode) savedInstanceState.getSerializable("user_mode");
 
@@ -188,7 +197,8 @@ public class MainActivity extends AppCompatActivity implements EventSelectorInte
                 public void onPageSelected(int position) {
                     Toast.makeText(MainActivity.this,
                             "Selected page position: " + position, Toast.LENGTH_SHORT).show();
-                    bindToEventService();
+                    //bindToEventService();
+
                     Fragment fragment = ((PageAdapter)vpPager.getAdapter()).getFragment(position);
 
                     if (fragment != null)
@@ -256,11 +266,16 @@ public class MainActivity extends AppCompatActivity implements EventSelectorInte
         super.onStart();
         LocalBroadcastManager.getInstance(this).registerReceiver(onEventServiceResult,
                 new IntentFilter(EventService.EVENT_UPDATED_EVENT));
+        bindToEventService();
 
         updateFragmentViewState(userMode);
     }
 
-
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Log.d(RESUME_TAG, "onResume: run");
+    }
 
     @Override
     protected void onDestroy() {
@@ -280,46 +295,38 @@ public class MainActivity extends AppCompatActivity implements EventSelectorInte
         }
         return true;
     }
-    private void startEventService() {
-        startService(new Intent(this, EventService.class));
-    }
 
-    private void stopWeatherService() {
-        stopService(new Intent(getBaseContext(), EventService.class));
-    }
+    private ServiceConnection eventServiceConnection = new ServiceConnection() {
 
-    private void setupConnectionToEventService(){
-        eventServiceConnection = new ServiceConnection() {
-            public void onServiceConnected(ComponentName className, IBinder service) {
-                // This is called when the connection with the service has been
-                // established, giving us the service object we can use to
-                // interact with the service.  Because we have bound to a explicit
-                // service that we know is running in our own process, we can
-                // cast its IBinder to a concrete class and directly access it.
-                //ref: http://developer.android.com/reference/android/app/Service.html
-                eventService = ((EventService.EventServiceBinder)service).getService();
-                Log.d("MAIN", "Weather service bound");
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            isBound = false;
+        }
 
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            EventService.EventServiceBinder eventServiceBinder = (EventService.EventServiceBinder) service;
+            eventService = eventServiceBinder.getService();
+            isBound = true;
+            events = eventService.getAllEvents();
+            Fragment fragment = ((PageAdapter)vpPager.getAdapter()).getFragment(vpPager.getCurrentItem());
+            if (fragment != null)
+            {
+                ((ForceUiUpdateInterface)fragment).updateEvents();
             }
+            if(events!=null && events.size() != 0)
+                eventDetails.setEvent(events.get(selectedEventIndex));
+            Log.d(EVENT_TAG, "onServiceConnected: got events");
+        }
+    };
 
-            public void onServiceDisconnected(ComponentName className) {
-                // This is called when the connection with the service has been
-                // unexpectedly disconnected -- that is, its process crashed.
-                // Because it is running in our same process, we should never
-                // see this happen.
-                //ref: http://developer.android.com/reference/android/app/Service.html
-                eventService = null;
-                Log.d("MAIN", "Weather service unbound");
-            }
-        };
-    }
 
-    private void bindToEventService(){
+    public void bindToEventService(){
         bindService(new Intent(MainActivity.this,
                 EventService.class), eventServiceConnection, Context.BIND_AUTO_CREATE);
     }
 
-    private void unbindFromEventService(){
+    public void unbindFromEventService(){
         unbindService(eventServiceConnection);
     }
 

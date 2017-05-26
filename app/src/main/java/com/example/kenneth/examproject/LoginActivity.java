@@ -1,7 +1,11 @@
 package com.example.kenneth.examproject;
 
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.graphics.Color;
+import android.os.IBinder;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -12,6 +16,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import com.example.kenneth.examproject.Services.EventService;
 import com.facebook.AccessToken;
 import com.facebook.AccessTokenTracker;
 import com.facebook.CallbackManager;
@@ -33,6 +38,9 @@ import java.util.List;
 
 public class LoginActivity extends AppCompatActivity {
 
+    private ServiceConnection eventServiceConnection;
+    private EventService eventService;
+
     private CallbackManager callbackManager;
     private AccessTokenTracker accessTokenTracker;
 
@@ -45,7 +53,7 @@ public class LoginActivity extends AppCompatActivity {
     private KeyListener cityTextKeyListener;
 
     List<String> IDList = new ArrayList<String>();
-    List <String> eventIDs = new ArrayList <String>();
+    List<String> eventIDs = new ArrayList<String>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -69,19 +77,17 @@ public class LoginActivity extends AppCompatActivity {
         accessTokenTracker = new AccessTokenTracker() {
             @Override
             protected void onCurrentAccessTokenChanged(AccessToken oldAccessToken, AccessToken currentAccessToken) {
-                if (currentAccessToken == null){
+                if (currentAccessToken == null) {
                     disableViews();
-                }
-                else{
+                } else {
                     enableViews();
                 }
             }
         };
 
-        info = (TextView)findViewById(R.id.info);
+        info = (TextView) findViewById(R.id.info);
 
-        loginButton = (LoginButton)findViewById(R.id.login_button);
-
+        loginButton = (LoginButton) findViewById(R.id.login_button);
 
 
         loginButton.registerCallback(callbackManager, new FacebookCallback<LoginResult>() {
@@ -109,7 +115,14 @@ public class LoginActivity extends AppCompatActivity {
         searchCity.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                searchCityFunc();
+
+                try {
+                    searchCityFunc();
+                } catch (IllegalAccessException e) {
+                    e.printStackTrace();
+                } catch (InstantiationException e) {
+                    e.printStackTrace();
+                }
             }
         });
         searchLocation.setOnClickListener(new View.OnClickListener() {
@@ -120,28 +133,30 @@ public class LoginActivity extends AppCompatActivity {
         });
     }
 
-    private void searchCityFunc(){
+    private void searchCityFunc() throws IllegalAccessException, InstantiationException {
         Intent i = new Intent(this, MainActivity.class);
         //initiate service to search by city name here....
+        setupConnectionToEventService();
+        bindToEventService();
 
         startActivity(i);
     }
 
-    private void searchLocationFunc(){
+    private void searchLocationFunc() {
         Intent i = new Intent(this, MainActivity.class);
         //initiate service to search by current location here...
 
         startActivity(i);
     }
 
-    private void enableViews(){
+    private void enableViews() {
         searchCity.setEnabled(true);
         searchLocation.setEnabled(true);
         cityText.setKeyListener(cityTextKeyListener);
         cityText.setEnabled(true);
     }
 
-    private void disableViews(){
+    private void disableViews() {
         searchCity.setEnabled(false);
         searchLocation.setEnabled(false);
         cityText.setKeyListener(null);
@@ -152,123 +167,39 @@ public class LoginActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         callbackManager.onActivityResult(requestCode, resultCode, data);
     }
+    public void setupConnectionToEventService(){
+        eventServiceConnection = new ServiceConnection() {
+            public void onServiceConnected(ComponentName className, IBinder service) {
+                // This is called when the connection with the service has been
+                // established, giving us the service object we can use to
+                // interact with the service.  Because we have bound to a explicit
+                // service that we know is running in our own process, we can
+                // cast its IBinder to a concrete class and directly access it.
+                //ref: http://developer.android.com/reference/android/app/Service.html
+                eventService = ((EventService.EventServiceBinder)service).getService();
+                Log.d("MAIN", "Weather service bound");
 
-    protected void getEvents()
-    {
-        Bundle params = new Bundle(3);
-        params.putString("type", "place");
-        params.putString("center", "56.162939,10.203921");
-        params.putString("distance", "5000");
+            }
 
-        new GraphRequest(
-                AccessToken.getCurrentAccessToken(),
-                "search",
-                params,
-                HttpMethod.GET,
-                new GraphRequest.Callback() {
-                    public void onCompleted(GraphResponse response) {
-                        if (response != null)
-                        {
-                            try
-                            {
-                                JSONArray data = response.getJSONObject().getJSONArray("data");
-
-                                for (int i = 0; i<data.length(); i++)
-                                    IDList.add(data.getJSONObject(i).getString("id"));
-
-                                Log.d("onCompleted", "got ID of places");
-
-                                getEventIDs();
-                            }
-                            catch (JSONException e){
-                                e.printStackTrace();
-                            }
-                        }
-                    }
-                }
-        ).executeAsync();
+            public void onServiceDisconnected(ComponentName className) {
+                // This is called when the connection with the service has been
+                // unexpectedly disconnected -- that is, its process crashed.
+                // Because it is running in our same process, we should never
+                // see this happen.
+                //ref: http://developer.android.com/reference/android/app/Service.html
+                eventService = null;
+                Log.d("MAIN", "Weather service unbound");
+            }
+        };
     }
 
-    protected void getEventIDs()
-    {
-        long unixTime = System.currentTimeMillis() / 1000L;
-        final Bundle params = new Bundle(2);
-        params.putString("ids", TextUtils.join(",", IDList));
-        params.putString("fields", "events.fields(name,id).since(" + unixTime + ")");
-
-        new GraphRequest(
-                AccessToken.getCurrentAccessToken(),
-                "/",
-                params,
-                HttpMethod.GET,
-                new GraphRequest.Callback(){
-                    public void onCompleted(GraphResponse response) {
-                        if (response != null)
-                        {
-                            try
-                            {
-                                JSONObject ID = response.getJSONObject();
-                                JSONArray dataArray;
-
-                                for (int i = 0; i<IDList.size(); i++)
-                                {
-                                    if (ID.getJSONObject(IDList.get(i)).has("events")) {
-                                        dataArray = ID.getJSONObject(IDList.get(i)).getJSONObject("events").getJSONArray("data");
-
-                                        for (int j = 0; j < dataArray.length(); j++)
-                                            eventIDs.add(dataArray.getJSONObject(j).getString("id"));
-                                    }
-                                }
-
-                                Log.d("onCompleted", "got event IDs");
-
-                                getEventData();
-                            }
-                            catch (JSONException e){
-                                e.printStackTrace();
-                            }
-                        }
-                    }
-                }
-        ).executeAsync();
+    public void bindToEventService(){
+        bindService(new Intent(LoginActivity.this,
+                EventService.class), eventServiceConnection, Context.BIND_AUTO_CREATE);
     }
 
-    protected void getEventData()
-    {
-        final Bundle params = new Bundle(1);
-        params.putString("ids", TextUtils.join(",", eventIDs));
-
-        new GraphRequest(
-                AccessToken.getCurrentAccessToken(),
-                "/",
-                params,
-                HttpMethod.GET,
-                new GraphRequest.Callback(){
-                    public void onCompleted(GraphResponse response) {
-                        if (response != null)
-                        {
-                            try
-                            {
-                                String description = response.getJSONObject().getJSONObject(eventIDs.get(1)).getString("description");
-                                String start_time = response.getJSONObject().getJSONObject(eventIDs.get(1)).getString("start_time");
-                                String end_time = response.getJSONObject().getJSONObject(eventIDs.get(1)).getString("end_time");
-                                String name = response.getJSONObject().getJSONObject(eventIDs.get(1)).getString("name");
-                                double latitude = response.getJSONObject().getJSONObject(eventIDs.get(1)).getJSONObject("place").getJSONObject("location").getDouble("latitude");
-                                double longitude = response.getJSONObject().getJSONObject(eventIDs.get(1)).getJSONObject("place").getJSONObject("location").getDouble("longitude");
-                                String adrress;
-
-                                if (response.getJSONObject().getJSONObject(eventIDs.get(1)).getJSONObject("place").getJSONObject("location").has("street"))
-                                    adrress = response.getJSONObject().getJSONObject(eventIDs.get(1)).getJSONObject("place").getJSONObject("location").getString("street");
-
-
-                                Log.d("onCompleted", "got event data");
-                            }
-                            catch (JSONException e){
-                                e.printStackTrace();
-                            }
-                        }
-                    }
-                }
-        ).executeAsync();
+    public void unbindFromEventService(){
+        unbindService(eventServiceConnection);
     }
 }
+

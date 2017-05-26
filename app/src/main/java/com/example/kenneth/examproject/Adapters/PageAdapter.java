@@ -4,9 +4,11 @@ import android.content.Context;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.app.FragmentStatePagerAdapter;
 import android.view.ViewGroup;
 
 import com.example.kenneth.examproject.DayFragment;
+import com.example.kenneth.examproject.Interfaces.ForceUiUpdateInterface;
 import com.example.kenneth.examproject.MonthFragment;
 import com.example.kenneth.examproject.R;
 import com.example.kenneth.examproject.WeekFragment;
@@ -44,7 +46,10 @@ public class PageAdapter extends FragmentPagerAdapter {
             Fragment f = (Fragment) obj;
             String tag = f.getTag();
             fragmentTags.put(position, tag);
+            ForceUiUpdateInterface t = (ForceUiUpdateInterface) f;
+            t.updateEvents();
         }
+
         return obj;
     }
 
