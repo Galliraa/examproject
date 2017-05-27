@@ -101,16 +101,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         SQLiteDatabase db = sInstance.getWritableDatabase();
         db.insert(TABLE_NAME, null, values);
-        String query = "SELECT * FROM " + TABLE_NAME + " WHERE 1";
 
-        //cursor point to a location in your results
-        Cursor c = db.rawQuery(query,null);
-
-        if(c.getCount() > 48) {
-            c.moveToFirst();
-            deleteEventFromDatabase(c.getInt(c.getColumnIndex(COLUMN_ID)));
-        }
-       // c.close();
         db.close();
     }
 
@@ -124,10 +115,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public List<Event> getAllEvents(){
         List<Event> events = new Vector<Event>();
         SQLiteDatabase db = sInstance.getWritableDatabase();
-        String query = "SELECT * FROM " + TABLE_NAME + " WHERE 1";
 
         //cursor point to a location in your results
-       // Cursor c = db.rawQuery(query,null);
         Cursor c = db.query(TABLE_NAME, null, null, null, null, null, COLUMN_START_TIME+" DESC");
         //move to taskId row
         c.moveToLast();
@@ -146,9 +135,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 temp.setEndTime(c.getString(c.getColumnIndex(COLUMN_END_TIME)));
                 temp.setEventImage(c.getString(c.getColumnIndex(COLUMN_URL)));
 
-                //byte[] byteArray = c.getBlob(c.getColumnIndex(COLUMN_URL));
-                //Bitmap bitmap = BitmapFactory.decodeByteArray(byteArray, 0, byteArray.length);
-                //temp.setEventImage(bitmap);
                 events.add(events.size(), temp);
                 c.moveToPrevious();
             }

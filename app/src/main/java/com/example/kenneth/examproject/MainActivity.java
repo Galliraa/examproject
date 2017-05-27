@@ -27,6 +27,7 @@ import com.example.kenneth.examproject.Models.Event;
 import com.example.kenneth.examproject.Services.EventService;
 
 import java.util.Calendar;
+import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Vector;
 
@@ -38,6 +39,23 @@ public class MainActivity extends AppCompatActivity implements EventSelectorInte
 
     private final static String EVENT_TAG = "EVENT";
     private final static String RESUME_TAG = "ONRESUME";
+    private static final String DETAILS_FRAG = "details_fragment";
+
+
+    private enum PhoneMode {PORTRAIT, LANDSCAPE}
+    private enum UserMode {LIST_VIEW, DETAILS_VIEW}
+
+    FragmentPagerAdapter adapterViewPager;
+
+    private EventService eventService;
+    private DetailsFragment eventDetails;
+    private List<Event> events;
+    private PhoneMode phoneMode;
+    private UserMode userMode;
+    private int selectedEventIndex;
+    private boolean isBound;
+    private ViewPager vpPager;
+    private LinearLayout detailsContainer;
 
     @Override
     public void onEventSelected(int position) {
@@ -61,11 +79,29 @@ public class MainActivity extends AppCompatActivity implements EventSelectorInte
         if(events != null) {
             List<Event> list = new Vector<>();
             Calendar c = Calendar.getInstance();
-            int j = 0;
+            String month;
+            String day;
+
+            if((c.get(Calendar.MONTH)+1) < 10)
+                month = "0"+(c.get(Calendar.MONTH)+1);
+            else
+                month = String.valueOf(c.get(Calendar.MONTH)+1);
+
+            if((c.get(Calendar.DAY_OF_MONTH)+1) < 10)
+                day = "0"+(c.get(Calendar.DAY_OF_MONTH));
+            else
+                day = String.valueOf(c.get(Calendar.DAY_OF_MONTH));
+
+
+            String compare = String.valueOf(c.get(Calendar.YEAR)) + "-" + month + "-" + day;
             for (int i = 0; i < events.size(); i++) {
-                if (!events.get(i).getStartTime().toString().substring(0, 10).equals(c.get(Calendar.YEAR) + "-" + c.get(Calendar.MONTH) + "-" + c.get(Calendar.DATE)))
-                    return list;
-                list.add(j, events.get(i));
+                if (!events.get(i).getStartTime().toString().substring(0, 10).equals(compare)) {
+                    if (i == 0)
+                        return null;
+                    else
+                        return list;
+                }
+                list.add(events.get(i));
             }
         }
         return events;
@@ -76,15 +112,14 @@ public class MainActivity extends AppCompatActivity implements EventSelectorInte
         if(events != null) {
             List<Event> list = new Vector<>();
             Calendar c = Calendar.getInstance();
-            int j = 0;
             for (int i = 0; i < events.size(); i++) {
-                if (Integer.parseInt(events.get(i).getStartTime().toString().substring(9, 10)) > (c.get(Calendar.DATE)+7) || Integer.parseInt(events.get(i).getStartTime().toString().substring(6, 7)) != (c.get(Calendar.MONTH))) {
-                    if (i == 0)
-                        return null;
-                    else
-                        return list;
-                }
-                    list.add(j, events.get(i));
+                if ((Integer.parseInt(events.get(i).getStartTime().toString().substring(8, 10)) > (c.get(Calendar.DAY_OF_MONTH)+7)) || Integer.parseInt(events.get(i).getStartTime().toString().substring(5, 7)) != (c.get(Calendar.MONTH))+1) {
+                        if (i == 0)
+                            return null;
+                        else
+                            return list;
+                    }
+                    list.add(events.get(i));
                 }
         }
         return events;
@@ -99,29 +134,6 @@ public class MainActivity extends AppCompatActivity implements EventSelectorInte
             return null;
     }
 
-    private enum PhoneMode {PORTRAIT, LANDSCAPE}
-    private enum UserMode {LIST_VIEW, DETAILS_VIEW}
-
-    private static final String DETAILS_FRAG = "details_fragment";
-
-    FragmentPagerAdapter adapterViewPager;
-
-
-    private EventService eventService;
-
-    private DetailsFragment eventDetails;
-    private List<Event> events;
-
-    private PhoneMode phoneMode;
-    private UserMode userMode;
-
-    private int selectedEventIndex;
-
-    private boolean isBound;
-
-    private ViewPager vpPager;
-    private LinearLayout detailsContainer;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -135,13 +147,8 @@ public class MainActivity extends AppCompatActivity implements EventSelectorInte
         vpPager = (ViewPager) findViewById(R.id.list_container);
         adapterViewPager = new PageAdapter(getSupportFragmentManager(), getApplicationContext());
         vpPager.setAdapter(adapterViewPager);
-        vpPager.setOffscreenPageLimit(1);
+        vpPager.setOffscreenPageLimit(2);
         detailsContainer = (LinearLayout)findViewById(R.id.details_container);
-
-
-
-        //load Events from web
-        //movies = new MovieLoader(this).getMovieList();
 
         //determine orientation
         if(getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT){
@@ -151,9 +158,6 @@ public class MainActivity extends AppCompatActivity implements EventSelectorInte
         }
 
         if(savedInstanceState == null) {
-
-            //setupConnectionToEventService();
-            //bindToEventService();
 
             selectedEventIndex = 0;
 
@@ -169,11 +173,6 @@ public class MainActivity extends AppCompatActivity implements EventSelectorInte
 
         } else {
             //got restarted, probably due to orientation change
-
-            //setupConnectionToEventService();
-            //bindToEventService();
-
-
             selectedEventIndex = savedInstanceState.getInt("event_position");
             userMode = (UserMode) savedInstanceState.getSerializable("user_mode");
 
@@ -197,8 +196,6 @@ public class MainActivity extends AppCompatActivity implements EventSelectorInte
                 public void onPageSelected(int position) {
                     Toast.makeText(MainActivity.this,
                             "Selected page position: " + position, Toast.LENGTH_SHORT).show();
-                    //bindToEventService();
-
                     Fragment fragment = ((PageAdapter)vpPager.getAdapter()).getFragment(position);
 
                     if (fragment != null)

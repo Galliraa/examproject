@@ -183,8 +183,9 @@ public class EventService extends Service {
         {
             Bundle params = new Bundle(3);
             params.putString("type", "place");
-            params.putString("center", "56.162939,10.203921");
+            params.putString("center", "37.76,-122.427"); //(center, latitude, longitude)
             params.putString("distance", "5000");
+            params.putString("limit", "100");
 
             new GraphRequest(
                     AccessToken.getCurrentAccessToken(),
@@ -204,7 +205,9 @@ public class EventService extends Service {
 
                                     Log.d("onCompleted", "got ID of places");
 
-                                    getEventIDs();
+                                        getEventIDs();
+                                        //getEventData();
+
                                 }
                                 catch (JSONException e){
                                     e.printStackTrace();
@@ -212,109 +215,113 @@ public class EventService extends Service {
                             }
                         }
                     }
-            ).executeAndWait();
+            ).executeAsync();
         }
 
         protected void getEventIDs()
         {
-            long unixTime = System.currentTimeMillis() / 1000L;
-            final Bundle params = new Bundle(2);
-            params.putString("ids", TextUtils.join(",", IDList));
-            params.putString("fields", "events.fields(name,id,cover).since(" + unixTime + ")");
+            for(int f = 0; f < ((IDList.size()+49)/50); f++) {
+                final List<String> IDs = IDList.subList(f * 50, ((f + 1) * 50));
+                long unixTime = System.currentTimeMillis() / 1000L;
+                final Bundle params = new Bundle(2);
+                params.putString("ids", TextUtils.join(",", IDs));
+                params.putString("fields", "events.fields(name,id,cover).since(" + unixTime + ")");
 
-            new GraphRequest(
-                    AccessToken.getCurrentAccessToken(),
-                    "/",
-                    params,
-                    HttpMethod.GET,
-                    new GraphRequest.Callback(){
-                        public void onCompleted(GraphResponse response) {
-                            if (response != null)
-                            {
-                                try
-                                {
-                                    JSONObject ID = response.getJSONObject();
-                                    JSONArray dataArray;
+                new GraphRequest(
+                        AccessToken.getCurrentAccessToken(),
+                        "/",
+                        params,
+                        HttpMethod.GET,
+                        new GraphRequest.Callback() {
+                            public void onCompleted(GraphResponse response) {
+                                if (response != null) {
+                                    try {
+                                        JSONObject ID = response.getJSONObject();
+                                        JSONArray dataArray;
 
-                                    for (int i = 0; i<IDList.size(); i++)
-                                    {
-                                        if (ID.getJSONObject(IDList.get(i)).has("events")) {
-                                            dataArray = ID.getJSONObject(IDList.get(i)).getJSONObject("events").getJSONArray("data");
+                                        for (int i = 0; i < (IDs.size()); i++) {
+                                            if (ID.getJSONObject(IDs.get(i)).has("events")) {
+                                                dataArray = ID.getJSONObject(IDs.get(i)).getJSONObject("events").getJSONArray("data");
 
-                                            for (int j = 0; j < dataArray.length(); j++)
-                                            {
-                                                eventIDs.add(dataArray.getJSONObject(j).getString("id"));
-                                                if (dataArray.getJSONObject(j).has("cover"))
-                                                    imageURLs.add(dataArray.getJSONObject(j).getJSONObject("cover").getString("source"));
-                                                else
-                                                    imageURLs.add(null);
+                                                for (int j = 0; j < dataArray.length(); j++) {
+                                                    eventIDs.add(dataArray.getJSONObject(j).getString("id"));
+                                                    if (dataArray.getJSONObject(j).has("cover"))
+                                                        imageURLs.add(dataArray.getJSONObject(j).getJSONObject("cover").getString("source"));
+                                                    else
+                                                        imageURLs.add(null);
+                                                }
                                             }
                                         }
+
+                                        Log.d("onCompleted", "got event IDs");
+
+                                        getEventData();
+                                    } catch (JSONException e) {
+                                        e.printStackTrace();
                                     }
-
-                                    Log.d("onCompleted", "got event IDs");
-
-                                    getEventData();
-                                }
-                                catch (JSONException e){
-                                    e.printStackTrace();
                                 }
                             }
                         }
-                    }
-            ).executeAndWait();
+                ).executeAsync();
+            }
         }
 
-        protected void getEventData()
-        {
-            final Bundle params = new Bundle(1);
-            params.putString("ids", TextUtils.join(",", eventIDs));
+        protected void getEventData() {
+            for (int f = 0; f < ((eventIDs.size() + 49) / 50); f++) {
+                int j = 0;
+                if(f == ((eventIDs.size() + 49) / 50)-1)
+                {
+                    j = 50-(eventIDs.size()%50);
+                }
 
-            new GraphRequest(
-                    AccessToken.getCurrentAccessToken(),
-                    "/",
-                    params,
-                    HttpMethod.GET,
-                    new GraphRequest.Callback(){
-                        public void onCompleted(GraphResponse response) {
-                            if (response != null)
-                            {
-                                try
-                                {
-                                    for (int i = 0; i<eventIDs.size(); i++) {
-                                        Event event = new Event();
+                final List<String> event50IDs = eventIDs.subList(f * 50, ((f + 1) * 50-j));
 
-                                        String description = response.getJSONObject().getJSONObject(eventIDs.get(i)).getString("description");
-                                        String start_time = response.getJSONObject().getJSONObject(eventIDs.get(i)).getString("start_time");
-                                        String end_time = response.getJSONObject().getJSONObject(eventIDs.get(i)).getString("end_time");
-                                        String name = response.getJSONObject().getJSONObject(eventIDs.get(i)).getString("name");
-                                        double latitude = response.getJSONObject().getJSONObject(eventIDs.get(i)).getJSONObject("place").getJSONObject("location").getDouble("latitude");
-                                        double longitude = response.getJSONObject().getJSONObject(eventIDs.get(i)).getJSONObject("place").getJSONObject("location").getDouble("longitude");
-                                        String address;
+                final Bundle params = new Bundle(1);
+                params.putString("ids", TextUtils.join(",", event50IDs));
 
-                                        if (response.getJSONObject().getJSONObject(eventIDs.get(i)).getJSONObject("place").getJSONObject("location").has("street")) {
-                                            address = response.getJSONObject().getJSONObject(eventIDs.get(i)).getJSONObject("place").getJSONObject("location").getString("street");
-                                            event.setAddress(address);
+                new GraphRequest(
+                        AccessToken.getCurrentAccessToken(),
+                        "/",
+                        params,
+                        HttpMethod.GET,
+                        new GraphRequest.Callback() {
+                            public void onCompleted(GraphResponse response) {
+                                if (response != null) {
+                                    try {
+                                        for (int i = 0; i < event50IDs.size(); i++) {
+                                            Event event = new Event();
+
+                                            String description = response.getJSONObject().getJSONObject(event50IDs.get(i)).getString("description");
+                                            String start_time = response.getJSONObject().getJSONObject(event50IDs.get(i)).getString("start_time");
+                                            String end_time = response.getJSONObject().getJSONObject(event50IDs.get(i)).getString("end_time");
+                                            String name = response.getJSONObject().getJSONObject(event50IDs.get(i)).getString("name");
+                                            double latitude = response.getJSONObject().getJSONObject(event50IDs.get(i)).getJSONObject("place").getJSONObject("location").getDouble("latitude");
+                                            double longitude = response.getJSONObject().getJSONObject(event50IDs.get(i)).getJSONObject("place").getJSONObject("location").getDouble("longitude");
+                                            String address;
+
+                                            if (response.getJSONObject().getJSONObject(event50IDs.get(i)).getJSONObject("place").getJSONObject("location").has("street")) {
+                                                address = response.getJSONObject().getJSONObject(event50IDs.get(i)).getJSONObject("place").getJSONObject("location").getString("street");
+                                                event.setAddress(address);
+                                            }
+
+                                            event.setDescrition(description);
+                                            event.setStartTime(start_time);
+                                            event.setEndTime(end_time);
+                                            event.setName(name);
+                                            event.setLatitude(latitude);
+                                            event.setLongitude(longitude);
+                                            event.setEventImage(imageURLs.get(i));
+                                            _database.addEvent(event);
                                         }
-
-                                        event.setDescrition(description);
-                                        event.setStartTime(start_time);
-                                        event.setEndTime(end_time);
-                                        event.setName(name);
-                                        event.setLatitude(latitude);
-                                        event.setLongitude(longitude);
-                                        event.setEventImage(imageURLs.get(i));
-                                        _database.addEvent(event);
+                                        Log.d("onCompleted", "got event data");
+                                    } catch (JSONException e) {
+                                        e.printStackTrace();
                                     }
-                                    Log.d("onCompleted", "got event data");
-                                }
-                                catch (JSONException e){
-                                    e.printStackTrace();
                                 }
                             }
                         }
-                    }
-            ).executeAndWait();
+                ).executeAsync();
+            }
         }
     }
 }

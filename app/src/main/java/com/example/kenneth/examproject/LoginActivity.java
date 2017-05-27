@@ -145,7 +145,8 @@ public class LoginActivity extends AppCompatActivity {
     private void searchLocationFunc() {
         Intent i = new Intent(this, MainActivity.class);
         //initiate service to search by current location here...
-
+        setupConnectionToEventService();
+        bindToEventService();
         startActivity(i);
     }
 
