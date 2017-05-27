@@ -38,11 +38,11 @@ import java.util.List;
 
 public class LoginActivity extends AppCompatActivity {
 
+    public static final int VIEW_REQUEST_CODE = 2;
+
     private ServiceConnection eventServiceConnection;
-    private EventService eventService;
 
     private CallbackManager callbackManager;
-    private AccessTokenTracker accessTokenTracker;
 
     private TextView info;
     private EditText cityText;
@@ -50,10 +50,10 @@ public class LoginActivity extends AppCompatActivity {
     private Button searchCity;
     private Button searchLocation;
 
+    private EventService eventService;
+
     private KeyListener cityTextKeyListener;
 
-    List<String> IDList = new ArrayList<String>();
-    List<String> eventIDs = new ArrayList<String>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -74,17 +74,6 @@ public class LoginActivity extends AppCompatActivity {
             disableViews();
         }
 
-        accessTokenTracker = new AccessTokenTracker() {
-            @Override
-            protected void onCurrentAccessTokenChanged(AccessToken oldAccessToken, AccessToken currentAccessToken) {
-                if (currentAccessToken == null) {
-                    disableViews();
-                } else {
-                    enableViews();
-                }
-            }
-        };
-
         info = (TextView) findViewById(R.id.info);
 
         loginButton = (LoginButton) findViewById(R.id.login_button);
@@ -92,26 +81,21 @@ public class LoginActivity extends AppCompatActivity {
 
         loginButton.registerCallback(callbackManager, new FacebookCallback<LoginResult>() {
             @Override
-            public void onSuccess(final LoginResult loginResult) {
-                info.setText(
-                        "User ID: "
-                                + loginResult.getAccessToken().getUserId()
-                                + "\n" +
-                                "Auth Token: "
-                                + loginResult.getAccessToken().getToken()
-                );
-            }
+            public void onSuccess(LoginResult loginResult) {
 
+            }
             @Override
             public void onCancel() {
-                info.setText("Login attempt canceled.");
+
             }
 
             @Override
             public void onError(FacebookException e) {
-                info.setText("Login attempt failed.");
             }
         });
+
+
+
         searchCity.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -139,7 +123,7 @@ public class LoginActivity extends AppCompatActivity {
         setupConnectionToEventService();
         bindToEventService();
 
-        startActivity(i);
+        startActivityForResult(i, VIEW_REQUEST_CODE);
     }
 
     private void searchLocationFunc() {
@@ -147,7 +131,7 @@ public class LoginActivity extends AppCompatActivity {
         //initiate service to search by current location here...
         setupConnectionToEventService();
         bindToEventService();
-        startActivity(i);
+        startActivityForResult(i, VIEW_REQUEST_CODE);
     }
 
     private void enableViews() {
@@ -166,7 +150,12 @@ public class LoginActivity extends AppCompatActivity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        callbackManager.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == VIEW_REQUEST_CODE) {
+            // Make sure the request was successful
+            if (resultCode == RESULT_OK) {
+                unbindFromEventService();
+            }
+        }
     }
     public void setupConnectionToEventService(){
         eventServiceConnection = new ServiceConnection() {

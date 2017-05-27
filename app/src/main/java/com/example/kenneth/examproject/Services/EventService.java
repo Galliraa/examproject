@@ -119,20 +119,24 @@ public class EventService extends Service {
         timer.schedule(doAsynchronousTask, 0, INTERVAL);
     }
 
-    class getEventTask extends AsyncTask<Void,Void,Void> {
+    private class getEventTask extends AsyncTask<Void,Void,Void> {
 
         private static final String GET_EVENT_TASK_TAG = "GetEventTask";
         private static final String City = "Aarhus";
+
+        private boolean doNext = false;
+        private String after;
+        private int count;
 
         private DatabaseHelper _database;
         private Context _context;
         private JSONObject data = null;
 
-        private List<String> IDList = new ArrayList<String>();
-        private List <String> eventIDs = new ArrayList <String>();
-        private List <String> imageURLs = new ArrayList <String>();
+        private List<String> IDList = new ArrayList<>();
+        private List <String> eventIDs = new ArrayList <>();
+        private List <String> imageURLs = new ArrayList <>();
 
-        public getEventTask(Context context, DatabaseHelper database){
+        private getEventTask(Context context, DatabaseHelper database){
             this._context = context;
             this._database = database;
         }
@@ -160,11 +164,16 @@ public class EventService extends Service {
             try
             {
 
-                events = _database.getAllEvents();
+                List<Event> tempEvents;
+                tempEvents = _database.getAllEvents();
+                for (int i = 0; i < (tempEvents.size()-1); i++) {
+                    if((tempEvents.get(i).getName().equals(tempEvents.get(i+1).getName()))) {
+                        if(tempEvents.get(i).getStartTime().equals(tempEvents.get(i+1).getStartTime())){}
+                        else {events.add(tempEvents.get(i));}}
+                    else {events.add(tempEvents.get(i));}
+                }
+                events.add(tempEvents.get(tempEvents.size()-1));
                 broadcastTaskResult(true);
-
-                return;
-
             } catch (Exception e) {
 
                 System.out.println("Exception "+ e.getMessage());
@@ -179,13 +188,14 @@ public class EventService extends Service {
             LocalBroadcastManager.getInstance(_context).sendBroadcast(intent);
         }
 
-        protected void getEvents()
+        private void getEvents()
         {
-            Bundle params = new Bundle(3);
+            Bundle params = new Bundle(4);
             params.putString("type", "place");
-            params.putString("center", "37.76,-122.427"); //(center, latitude, longitude)
+            params.putString("center", "56.162939,10.203921"); //(center, latitude, longitude)
             params.putString("distance", "5000");
             params.putString("limit", "100");
+
 
             new GraphRequest(
                     AccessToken.getCurrentAccessToken(),
@@ -205,9 +215,14 @@ public class EventService extends Service {
 
                                     Log.d("onCompleted", "got ID of places");
 
-                                        getEventIDs();
-                                        //getEventData();
-
+                                    if(response.getJSONObject().has("paging")) {
+                                        if (response.getJSONObject().getJSONObject("paging").has("cursors")) {
+                                            if (response.getJSONObject().getJSONObject("paging").getJSONObject("cursors").has("after")) {
+                                                after = (response.getJSONObject().getJSONObject("paging").getJSONObject("cursors").getString("after"));
+                                                doNext = true;
+                                            }
+                                        }
+                                    }
                                 }
                                 catch (JSONException e){
                                     e.printStackTrace();
@@ -215,17 +230,75 @@ public class EventService extends Service {
                             }
                         }
                     }
-            ).executeAsync();
+            ).executeAndWait();
+
+            do {
+                params.putString("after", after);
+                params.putString("type", "place");
+                params.putString("center", "56.162939,10.203921"); //(center, latitude, longitude)
+                params.putString("distance", "5000");
+                params.putString("limit", "100");
+
+                doNext = false;
+
+                new GraphRequest(
+                        AccessToken.getCurrentAccessToken(),
+                        "search",
+                        params,
+                        HttpMethod.GET,
+                        new GraphRequest.Callback() {
+                            public void onCompleted(GraphResponse response) {
+                                if (response != null) {
+                                    try {
+                                        JSONArray data = response.getJSONObject().getJSONArray("data");
+
+                                        for (int i = 0; i < data.length(); i++)
+                                            IDList.add(data.getJSONObject(i).getString("id"));
+
+                                        Log.d("onCompleted", "got ID of places");
+
+                                        if(response.getJSONObject().has("paging")) {
+                                            if (response.getJSONObject().getJSONObject("paging").has("cursors")) {
+                                                if (response.getJSONObject().getJSONObject("paging").getJSONObject("cursors").has("after")) {
+                                                    after = (response.getJSONObject().getJSONObject("paging").getJSONObject("cursors").getString("after"));
+                                                    doNext = true;
+                                                }
+                                            }
+                                        }
+
+                                    } catch (JSONException e) {
+                                        e.printStackTrace();
+                                    }
+                                }
+                            }
+                        }
+                ).executeAndWait();
+            }while(doNext);
+            getEventIDs();
         }
 
-        protected void getEventIDs()
+        private void getEventIDs()
         {
+            final Long unixStartime = System.currentTimeMillis() / 1000L;
+            final Long unixEndtime = unixStartime + 2592000;
+
+
+
             for(int f = 0; f < ((IDList.size()+49)/50); f++) {
-                final List<String> IDs = IDList.subList(f * 50, ((f + 1) * 50));
-                long unixTime = System.currentTimeMillis() / 1000L;
+
+                int j = 0;
+                if(f == ((IDList.size() + 49) / 50)-1)
+                {
+                    j = 50-(IDList.size()%50);
+                }
+
+                final List<String> location50IDs = IDList.subList(f * 50, ((f + 1) * 50-j));
+
+
                 final Bundle params = new Bundle(2);
-                params.putString("ids", TextUtils.join(",", IDs));
-                params.putString("fields", "events.fields(name,id,cover).since(" + unixTime + ")");
+                params.putString("ids", TextUtils.join(",", location50IDs));
+                params.putString("fields", "events.fields(name,id,cover).since(" + unixStartime + ").until(" + unixEndtime + ")");
+
 
                 new GraphRequest(
                         AccessToken.getCurrentAccessToken(),
@@ -239,9 +312,9 @@ public class EventService extends Service {
                                         JSONObject ID = response.getJSONObject();
                                         JSONArray dataArray;
 
-                                        for (int i = 0; i < (IDs.size()); i++) {
-                                            if (ID.getJSONObject(IDs.get(i)).has("events")) {
-                                                dataArray = ID.getJSONObject(IDs.get(i)).getJSONObject("events").getJSONArray("data");
+                                        for (int i = 0; i < (location50IDs.size()); i++) {
+                                            if (ID.getJSONObject(location50IDs.get(i)).has("events")) {
+                                                dataArray = ID.getJSONObject(location50IDs.get(i)).getJSONObject("events").getJSONArray("data");
 
                                                 for (int j = 0; j < dataArray.length(); j++) {
                                                     eventIDs.add(dataArray.getJSONObject(j).getString("id"));
@@ -255,19 +328,21 @@ public class EventService extends Service {
 
                                         Log.d("onCompleted", "got event IDs");
 
-                                        getEventData();
+
                                     } catch (JSONException e) {
                                         e.printStackTrace();
                                     }
                                 }
                             }
                         }
-                ).executeAsync();
+                ).executeAndWait();
             }
+            getEventData();
         }
 
-        protected void getEventData() {
-            for (int f = 0; f < ((eventIDs.size() + 49) / 50); f++) {
+        private void getEventData() {
+            count = 0;
+            for (int f = 0; f < ((eventIDs.size()+49) / 50); f++) {
                 int j = 0;
                 if(f == ((eventIDs.size() + 49) / 50)-1)
                 {
@@ -291,26 +366,43 @@ public class EventService extends Service {
                                         for (int i = 0; i < event50IDs.size(); i++) {
                                             Event event = new Event();
 
-                                            String description = response.getJSONObject().getJSONObject(event50IDs.get(i)).getString("description");
-                                            String start_time = response.getJSONObject().getJSONObject(event50IDs.get(i)).getString("start_time");
-                                            String end_time = response.getJSONObject().getJSONObject(event50IDs.get(i)).getString("end_time");
-                                            String name = response.getJSONObject().getJSONObject(event50IDs.get(i)).getString("name");
-                                            double latitude = response.getJSONObject().getJSONObject(event50IDs.get(i)).getJSONObject("place").getJSONObject("location").getDouble("latitude");
-                                            double longitude = response.getJSONObject().getJSONObject(event50IDs.get(i)).getJSONObject("place").getJSONObject("location").getDouble("longitude");
-                                            String address;
-
-                                            if (response.getJSONObject().getJSONObject(event50IDs.get(i)).getJSONObject("place").getJSONObject("location").has("street")) {
-                                                address = response.getJSONObject().getJSONObject(event50IDs.get(i)).getJSONObject("place").getJSONObject("location").getString("street");
-                                                event.setAddress(address);
+                                            if (response.getJSONObject().getJSONObject(event50IDs.get(i)).has("description")) {
+                                                String description = response.getJSONObject().getJSONObject(event50IDs.get(i)).getString("description");
+                                                event.setDescrition(description);
                                             }
 
-                                            event.setDescrition(description);
-                                            event.setStartTime(start_time);
-                                            event.setEndTime(end_time);
-                                            event.setName(name);
-                                            event.setLatitude(latitude);
-                                            event.setLongitude(longitude);
-                                            event.setEventImage(imageURLs.get(i));
+                                            if (response.getJSONObject().getJSONObject(event50IDs.get(i)).has("start_time")) {
+                                                String start_time = response.getJSONObject().getJSONObject(event50IDs.get(i)).getString("start_time");
+                                                event.setStartTime(start_time);
+                                            }
+
+                                            if (response.getJSONObject().getJSONObject(event50IDs.get(i)).has("end_time")) {
+                                                String end_time = response.getJSONObject().getJSONObject(event50IDs.get(i)).getString("end_time");
+                                                event.setEndTime(end_time);
+                                            }
+
+                                            if (response.getJSONObject().getJSONObject(event50IDs.get(i)).has("name")) {
+                                                String name = response.getJSONObject().getJSONObject(event50IDs.get(i)).getString("name");
+                                                event.setName(name);
+                                            }
+
+                                            if (response.getJSONObject().getJSONObject(event50IDs.get(i)).has("place")) {
+                                                if (response.getJSONObject().getJSONObject(event50IDs.get(i)).getJSONObject("place").has("location")){
+                                                    if(response.getJSONObject().getJSONObject(event50IDs.get(i)).getJSONObject("place").getJSONObject("location").has("latitude"))
+                                                    {
+                                                        double latitude = response.getJSONObject().getJSONObject(event50IDs.get(i)).getJSONObject("place").getJSONObject("location").getDouble("latitude");
+                                                        double longitude = response.getJSONObject().getJSONObject(event50IDs.get(i)).getJSONObject("place").getJSONObject("location").getDouble("longitude");
+                                                        event.setLatitude(latitude);
+                                                        event.setLongitude(longitude);
+                                                        if (response.getJSONObject().getJSONObject(event50IDs.get(i)).getJSONObject("place").getJSONObject("location").has("street")) {
+                                                            String address = response.getJSONObject().getJSONObject(event50IDs.get(i)).getJSONObject("place").getJSONObject("location").getString("street");
+                                                            event.setAddress(address);
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                            event.setEventImage(imageURLs.get(count));
+                                            count++;
                                             _database.addEvent(event);
                                         }
                                         Log.d("onCompleted", "got event data");
@@ -320,7 +412,7 @@ public class EventService extends Service {
                                 }
                             }
                         }
-                ).executeAsync();
+                ).executeAndWait();
             }
         }
     }

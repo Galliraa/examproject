@@ -95,7 +95,7 @@ public class MainActivity extends AppCompatActivity implements EventSelectorInte
 
             String compare = String.valueOf(c.get(Calendar.YEAR)) + "-" + month + "-" + day;
             for (int i = 0; i < events.size(); i++) {
-                if (!events.get(i).getStartTime().toString().substring(0, 10).equals(compare)) {
+                if (!events.get(i).getStartTime().substring(0, 10).equals(compare)) {
                     if (i == 0)
                         return null;
                     else
@@ -113,7 +113,7 @@ public class MainActivity extends AppCompatActivity implements EventSelectorInte
             List<Event> list = new Vector<>();
             Calendar c = Calendar.getInstance();
             for (int i = 0; i < events.size(); i++) {
-                if ((Integer.parseInt(events.get(i).getStartTime().toString().substring(8, 10)) > (c.get(Calendar.DAY_OF_MONTH)+7)) || Integer.parseInt(events.get(i).getStartTime().toString().substring(5, 7)) != (c.get(Calendar.MONTH))+1) {
+                if ((Integer.parseInt(events.get(i).getStartTime().substring(8, 10)) > (c.get(Calendar.DAY_OF_MONTH)+7)) || Integer.parseInt(events.get(i).getStartTime().substring(5, 7)) != (c.get(Calendar.MONTH))+1) {
                         if (i == 0)
                             return null;
                         else
@@ -223,6 +223,7 @@ public class MainActivity extends AppCompatActivity implements EventSelectorInte
     public void onBackPressed() {
         if(phoneMode == PhoneMode.LANDSCAPE){
             //finish on back press in landscape, go to search page
+                setResult(RESULT_OK);
                 finish();
         } else {
             if (userMode == UserMode.DETAILS_VIEW) {
@@ -230,6 +231,7 @@ public class MainActivity extends AppCompatActivity implements EventSelectorInte
                 updateFragmentViewState(UserMode.LIST_VIEW);
             } else if (userMode == UserMode.LIST_VIEW) {
                 //go to search activity from listview
+                setResult(RESULT_OK);
                 finish();
             }
         }
@@ -332,7 +334,7 @@ public class MainActivity extends AppCompatActivity implements EventSelectorInte
         public void onReceive(Context context, Intent intent) {
             Boolean result = intent.getBooleanExtra(EventService.GET_EVENT_TASK_RESULT, false);
 
-            Log.d("MAIN", "onReceive: GetWeatherTask result received " + result);
+            Log.d("MAIN", "onReceive: GetTask result received " + result);
             if (result) {
                 events = eventService.getAllEvents();
 

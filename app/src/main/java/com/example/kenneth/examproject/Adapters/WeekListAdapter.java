@@ -65,7 +65,7 @@ public class WeekListAdapter extends BaseAdapter {
             nameView.setText(event.getName());
 
             TextView dateView = (TextView) convertView.findViewById(R.id.eventDateTV);
-            dateView.setText(event.getStartTime());
+            dateView.setText(event.getStartTime().substring(5,10));
         }
         return convertView;
     }
