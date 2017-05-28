@@ -10,4 +10,9 @@
     <string name="cityHint">Insert City here</string>
     <string name="citySearch">Search by City</string>
     <string name="locationSearch">Search by Location</string>
+    <string name="slider_distance">Distance</string>
+    <string name="noName">No name</string>
+    <string name="noDesc">No description</string>
+    <string name="noAddress">No adress</string>
+    <string name="noDate">No date</string>
 </resources>

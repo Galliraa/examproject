@@ -142,8 +142,6 @@ public class MainActivity extends AppCompatActivity implements EventSelectorInte
         final ConnectivityManager cm =
                 (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
 
-
-
         vpPager = (ViewPager) findViewById(R.id.list_container);
         adapterViewPager = new PageAdapter(getSupportFragmentManager(), getApplicationContext());
         vpPager.setAdapter(adapterViewPager);

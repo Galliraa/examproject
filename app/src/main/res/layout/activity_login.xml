@@ -13,7 +13,13 @@
         android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
         android:textSize="18sp"
-        />
+        android:layout_marginLeft="8dp"
+        app:layout_constraintLeft_toLeftOf="parent"
+        android:layout_marginRight="8dp"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintHorizontal_bias="0.504"
+        android:layout_marginTop="32dp"
+        app:layout_constraintTop_toBottomOf="@+id/locationButton" />
 
     <com.facebook.login.widget.LoginButton
         android:id="@+id/login_button"
@@ -67,5 +73,17 @@
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/cityButton" />
+
+    <SeekBar
+        android:id="@+id/seekBar"
+        android:layout_width="172dp"
+        android:layout_height="0dp"
+        android:layout_marginLeft="0dp"
+        android:layout_marginRight="0dp"
+        app:layout_constraintLeft_toLeftOf="@+id/locationButton"
+        app:layout_constraintRight_toRightOf="@+id/locationButton"
+        android:layout_marginTop="32dp"
+        app:layout_constraintTop_toBottomOf="@+id/info"
+        app:layout_constraintHorizontal_bias="1.0" />
 
 </android.support.constraint.ConstraintLayout>

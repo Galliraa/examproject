@@ -47,6 +47,10 @@ public class EventService extends Service {
     private final static String EVENTSERVICE_TAG = "EVENT SERVICE";
     private final static int INTERVAL = 1000 * 60 * 30;
     private final static int TEST_INTERVAL = 10000;
+    private double latitude;
+    private double longitude;
+    private float distance;
+    private boolean serviceStarted = false;
 
     public List<Event> events;
 
@@ -69,6 +73,15 @@ public class EventService extends Service {
 
     @Override
     public IBinder onBind(Intent intent) {
+
+        if (!serviceStarted)
+        {
+            latitude = intent.getExtras().getDouble("lat");
+            longitude = intent.getExtras().getDouble("lng");
+            distance = intent.getExtras().getFloat("distance");
+            serviceStarted = true;
+        }
+
         return binder;
     }
 
@@ -77,7 +90,6 @@ public class EventService extends Service {
         super.onCreate();
 
         database = DatabaseHelper.getInstance(this);
-
 
                 scheduleEventTask();
                 Log.d(EVENTSERVICE_TAG, "onStartCommand: Service Started");
@@ -192,8 +204,8 @@ public class EventService extends Service {
         {
             Bundle params = new Bundle(4);
             params.putString("type", "place");
-            params.putString("center", "56.162939,10.203921"); //(center, latitude, longitude)
-            params.putString("distance", "5000");
+            params.putString("center", String.valueOf(latitude) + "," + String.valueOf(longitude)); //(center, latitude, longitude)
+            params.putString("distance", String.valueOf((int)distance*1000));
             params.putString("limit", "100");
 
 
@@ -235,8 +247,8 @@ public class EventService extends Service {
             do {
                 params.putString("after", after);
                 params.putString("type", "place");
-                params.putString("center", "56.162939,10.203921"); //(center, latitude, longitude)
-                params.putString("distance", "5000");
+                params.putString("center", String.valueOf(latitude) + "," + String.valueOf(longitude)); //(center, latitude, longitude)
+                params.putString("distance", String.valueOf((int)distance*1000));
                 params.putString("limit", "100");
 
                 doNext = false;

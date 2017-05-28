@@ -14,8 +14,20 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.SeekBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.android.volley.Cache;
+import com.android.volley.Network;
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.BasicNetwork;
+import com.android.volley.toolbox.DiskBasedCache;
+import com.android.volley.toolbox.HurlStack;
+import com.android.volley.toolbox.JsonObjectRequest;
 import com.example.kenneth.examproject.Services.EventService;
 import com.facebook.AccessToken;
 import com.facebook.AccessTokenTracker;
@@ -49,10 +61,17 @@ public class LoginActivity extends AppCompatActivity {
     private LoginButton loginButton;
     private Button searchCity;
     private Button searchLocation;
+    private SeekBar slider;
+    private float distance = 5;
 
     private EventService eventService;
 
     private KeyListener cityTextKeyListener;
+
+    private RequestQueue mRequestQueue;
+
+    private double lat;
+    private double lng;
 
 
     @Override
@@ -69,20 +88,37 @@ public class LoginActivity extends AppCompatActivity {
         searchLocation = (Button) findViewById(R.id.locationButton);
         cityText = (EditText) findViewById(R.id.cityText);
         cityTextKeyListener = cityText.getKeyListener();
+        info = (TextView) findViewById(R.id.info);
+        slider = (SeekBar) findViewById(R.id.seekBar);
+        loginButton = (LoginButton) findViewById(R.id.login_button);
+
+
+        // https://developer.android.com/training/volley/requestqueue.html
+        // Instantiate the cache
+        Cache cache = new DiskBasedCache(getCacheDir(), 1024 * 1024); // 1MB cap
+        // Set up the network to use HttpURLConnection as the HTTP client.
+        Network network = new BasicNetwork(new HurlStack());
+        // Instantiate the RequestQueue with the cache and network.
+        mRequestQueue = new RequestQueue(cache, network);
+        // Start the queue
+        mRequestQueue.start();
+
 
         if (AccessToken.getCurrentAccessToken() == null) {
             disableViews();
         }
 
-        info = (TextView) findViewById(R.id.info);
-
-        loginButton = (LoginButton) findViewById(R.id.login_button);
 
 
+        slider.setProgress(45);
+        slider.setMax(90);
+        info.setText(getString(R.string.slider_distance) + ": " + distance + " km");
+
+        //https://code.tutsplus.com/tutorials/quick-tip-add-facebook-login-to-your-android-app--cms-23837
         loginButton.registerCallback(callbackManager, new FacebookCallback<LoginResult>() {
             @Override
             public void onSuccess(LoginResult loginResult) {
-
+            enableViews();
             }
             @Override
             public void onCancel() {
@@ -95,6 +131,25 @@ public class LoginActivity extends AppCompatActivity {
         });
 
 
+
+
+        slider.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                distance = (float) progress/10 + (float) 1;
+                info.setText(getString(R.string.slider_distance) + ": " + String.valueOf(distance) + " km");
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+
+            }
+        });
 
         searchCity.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -118,19 +173,51 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void searchCityFunc() throws IllegalAccessException, InstantiationException {
-        Intent i = new Intent(this, MainActivity.class);
+        final Intent i = new Intent(this, MainActivity.class);
         //initiate service to search by city name here....
-        setupConnectionToEventService();
-        bindToEventService();
 
-        startActivityForResult(i, VIEW_REQUEST_CODE);
+        String url = "https://maps.googleapis.com/maps/api/geocode/json?address=" + cityText.getText();
+
+        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
+            @Override
+            public void onResponse(JSONObject response) {
+                try
+                {
+                    if (response != null)
+                    {
+                        JSONObject data = response.getJSONArray("results").getJSONObject(0).getJSONObject("geometry").getJSONObject("location");
+                        lat = data.getDouble("lat");
+                        lng = data.getDouble("lng");
+
+                        info.setText(String.valueOf(lat) + "," + String.valueOf(lng));
+                    }
+
+                    setupConnectionToEventService();
+                    bindToEventService(lat, lng, distance);
+
+                    startActivityForResult(i, VIEW_REQUEST_CODE);
+                }
+                catch (JSONException e)
+                {
+                    e.printStackTrace();
+                }
+
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+
+            }
+        });
+
+        mRequestQueue.add(jsonObjectRequest);
     }
 
     private void searchLocationFunc() {
         Intent i = new Intent(this, MainActivity.class);
         //initiate service to search by current location here...
         setupConnectionToEventService();
-        bindToEventService();
+        bindToEventService(lat, lng, distance);
         startActivityForResult(i, VIEW_REQUEST_CODE);
     }
 
@@ -139,6 +226,7 @@ public class LoginActivity extends AppCompatActivity {
         searchLocation.setEnabled(true);
         cityText.setKeyListener(cityTextKeyListener);
         cityText.setEnabled(true);
+        slider.setEnabled(true);
     }
 
     private void disableViews() {
@@ -146,10 +234,12 @@ public class LoginActivity extends AppCompatActivity {
         searchLocation.setEnabled(false);
         cityText.setKeyListener(null);
         cityText.setEnabled(false);
+        slider.setEnabled(false);
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        callbackManager.onActivityResult(requestCode, resultCode, data);
         if (requestCode == VIEW_REQUEST_CODE) {
             // Make sure the request was successful
             if (resultCode == RESULT_OK) {
@@ -168,7 +258,6 @@ public class LoginActivity extends AppCompatActivity {
                 //ref: http://developer.android.com/reference/android/app/Service.html
                 eventService = ((EventService.EventServiceBinder)service).getService();
                 Log.d("MAIN", "Weather service bound");
-
             }
 
             public void onServiceDisconnected(ComponentName className) {
@@ -183,9 +272,14 @@ public class LoginActivity extends AppCompatActivity {
         };
     }
 
-    public void bindToEventService(){
-        bindService(new Intent(LoginActivity.this,
-                EventService.class), eventServiceConnection, Context.BIND_AUTO_CREATE);
+    public void bindToEventService(double lat, double lng, float distance){
+
+        Intent i = new Intent(LoginActivity.this, EventService.class);
+
+        i.putExtra("lat", lat);
+        i.putExtra("lng", lng);
+        i.putExtra("distance", distance);
+        bindService(i, eventServiceConnection, Context.BIND_AUTO_CREATE);
     }
 
     public void unbindFromEventService(){

@@ -91,17 +91,35 @@ public class DayListAdapter extends BaseAdapter {
             //eventImageView.setImageBitmap(event.getEventImage());
 
             TextView nameView = (TextView) convertView.findViewById(R.id.eventNameTV);
-            nameView.setText(event.getName());
+            if (event.getName() != null)
+                nameView.setText(event.getName());
+            else
+                nameView.setText(context.getString(R.string.noName));
 
             TextView dateView = (TextView) convertView.findViewById(R.id.eventDateTV);
-            dateView.setText(event.getStartTime());
+            if (event.getStartTime() != null)
+                dateView.setText(event.getStartTime());
+            else
+                dateView.setText(context.getString(R.string.noDate));
 
             TextView descView = (TextView) convertView.findViewById(R.id.eventDescTV);
-            String s = event.getDescrition().substring(0,100);
+            if (event.getDescrition() != null)
+            {
+                String s;
+                if(event.getDescrition().length()>100) {
+                    s = event.getDescrition().substring(0, 100);
+                }
+                else
+                    s = event.getDescrition();
+                descView.setText(s);
+            }
+
+            else
+                descView.setText(context.getString(R.string.noDesc));
+
 
             imageView = (NetworkImageView) convertView.findViewById(R.id.eventIV);
             imageView.setImageUrl(event.getEventImage(), mImageLoader);
-            descView.setText(s);
         }
         return convertView;
     }
