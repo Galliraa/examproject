@@ -13,5 +13,5 @@
         android:horizontalSpacing="0dp"
         android:numColumns="3"
         android:stretchMode="columnWidth"
-        android:verticalSpacing="30dp"></GridView>
+        android:verticalSpacing="0dp"></GridView>
 </RelativeLayout>

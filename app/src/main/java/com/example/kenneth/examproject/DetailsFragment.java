@@ -127,6 +127,17 @@ public class DetailsFragment extends Fragment implements OnMapReadyCallback {
                 descTV.setText(event.getDescrition());
                 eventIV.setImageUrl(event.getEventImage(), mImageLoader);
 
+                if(event.getStartTime() != null) {
+                    dateTV.setText(getString(R.string.dateDesc)+" "+event.getStartTime().substring(5,10)+"   ");
+                    timeTV.setText(getString(R.string.timeDesc)+" "+event.getStartTime().substring(11,16));
+                }
+                else
+                {
+                    dateTV.setText(R.string.noDate);
+                    timeTV.setText(R.string.noTime);
+                }
+
+
                 eventLattitude = event.getLatitude();
                 eventLongitude = event.getLongitude();
 

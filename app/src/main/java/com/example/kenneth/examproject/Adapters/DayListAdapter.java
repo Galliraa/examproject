@@ -98,7 +98,7 @@ public class DayListAdapter extends BaseAdapter {
 
             TextView dateView = (TextView) convertView.findViewById(R.id.eventDateTV);
             if (event.getStartTime() != null)
-                dateView.setText(event.getStartTime());
+                dateView.setText(context.getString(R.string.dateDesc)+" "+event.getStartTime().substring(5,10)+" "+context.getString(R.string.timeDesc)+" "+event.getStartTime().substring(11,16));
             else
                 dateView.setText(context.getString(R.string.noDate));
 

@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- https://developer.android.com/samples/BasicMediaRouter/res/values/colors.html -->
+<resources>
+    <color name="c1">#c62123</color>
+    <color name="c2">#9294d1</color>
+    <color name="c3">#ff7f00</color>
+    <color name="c4">#bcbc23</color>
+    <color name="c5">#63a125</color>
+    <color name="c6">#46b1aa</color>
+    <color name="c7">#038afd</color>
+    <color name="c8">#c163c4</color>
+    <color name="c9">#9b9d9e</color>
+    <color name="c10">#fefeff</color>
+    <color name="c11">#ff00a6</color>
+    <color name="c12">#59e925</color>
+    <color name="c13">#ff0900</color>
+    <color name="c14">#9000ff</color>
+    <color name="c15">#5eff00</color>
+    <color name="c16">#ffff00</color>
+    <color name="c17">#000dff</color>
+    <color name="c18">#ff0059</color>
+    <color name="c19">#ff8000</color>
+    <color name="c20">#00ffea</color>
+    <color name="c21">#0dff00</color>
+    <color name="c22">#0400ff</color>
+    <color name="c23">#ff2f00</color>
+    <color name="c24">#c4ff00</color>
+    <color name="c25">#b300ff</color>
+    <color name="c26">#007FFF</color>
+    <color name="c27">#ff2600</color>
+    <color name="c28">#ff007b</color>
+    <color name="c29">#f7ff00</color>
+    <color name="c30">#00ff00</color>
+    <color name="c31">#FF00FF</color>
+
+    <array name="list_backgroundcolor">
+        <item>@color/c1</item>
+        <item>@color/c2</item>
+        <item>@color/c3</item>
+        <item>@color/c4</item>
+        <item>@color/c5</item>
+        <item>@color/c6</item>
+        <item>@color/c7</item>
+        <item>@color/c8</item>
+        <item>@color/c9</item>
+        <item>@color/c10</item>
+        <item>@color/c11</item>
+        <item>@color/c12</item>
+        <item>@color/c13</item>
+        <item>@color/c14</item>
+        <item>@color/c15</item>
+        <item>@color/c16</item>
+        <item>@color/c17</item>
+        <item>@color/c18</item>
+        <item>@color/c19</item>
+        <item>@color/c20</item>
+        <item>@color/c21</item>
+        <item>@color/c22</item>
+        <item>@color/c23</item>
+        <item>@color/c24</item>
+        <item>@color/c25</item>
+        <item>@color/c26</item>
+        <item>@color/c27</item>
+        <item>@color/c28</item>
+        <item>@color/c29</item>
+        <item>@color/c30</item>
+        <item>@color/c31</item>
+    </array>
+</resources>

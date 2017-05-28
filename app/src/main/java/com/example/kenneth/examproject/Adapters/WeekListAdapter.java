@@ -61,6 +61,10 @@ public class WeekListAdapter extends BaseAdapter {
         event = events.get(position);
         if(event !=null) {
 
+            //convertView.setBackgroundColor(Integer.parseInt(event.getStartTime().substring(8,10)+event.getStartTime().substring(8,10)+event.getStartTime().substring(8,10)));
+
+            convertView.setBackgroundColor(context.getResources().getIntArray(R.array.list_backgroundcolor)[Integer.parseInt(event.getStartTime().substring(8,10))-1]);
+
             TextView nameView = (TextView) convertView.findViewById(R.id.eventNameTV);
             nameView.setText(event.getName());
 

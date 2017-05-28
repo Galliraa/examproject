@@ -15,4 +15,7 @@
     <string name="noDesc">No description</string>
     <string name="noAddress">No adress</string>
     <string name="noDate">No date</string>
+    <string name="noTime">No time</string>
+    <string name="dateDesc">Date: </string>
+    <string name="timeDesc">Time: </string>
 </resources>
