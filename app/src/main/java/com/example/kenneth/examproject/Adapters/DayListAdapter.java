@@ -8,6 +8,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.android.volley.RequestQueue;
@@ -20,10 +21,6 @@ import com.example.kenneth.examproject.R;
 import java.util.List;
 
 import static com.example.kenneth.examproject.R.id.parent;
-
-/**
- * Created by Kenneth on 20-04-2017.
- */
 
 public class DayListAdapter extends BaseAdapter {
 
@@ -41,7 +38,7 @@ public class DayListAdapter extends BaseAdapter {
 
         mRequestQueue = Volley.newRequestQueue(c);
         mImageLoader = new ImageLoader(mRequestQueue, new ImageLoader.ImageCache() {
-            private final LruCache<String, Bitmap> mCache = new LruCache<String, Bitmap>(10);
+            private final LruCache<String, Bitmap> mCache = new LruCache<>(10);
 
             public void putBitmap(String url, Bitmap bitmap) {
                 mCache.put(url, bitmap);

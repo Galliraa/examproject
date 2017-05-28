@@ -5,5 +5,6 @@ package com.example.kenneth.examproject.Interfaces;
  */
 
 public interface ForceUiUpdateInterface {
-    public void updateEvents();
+    void updateEvents();
+    void stopSpinner();
 }

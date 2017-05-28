@@ -9,14 +9,12 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     tools:context="com.example.kenneth.examproject.DetailsFragment">
-    android:layout_height="match_parent">
 
     <com.android.volley.toolbox.NetworkImageView
         android:id="@+id/eventIV"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:srcCompat="@android:drawable/ic_menu_report_image"
-        android:layout_weight="0.27"
         android:layout_alignParentTop="true"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true" />
@@ -29,57 +27,52 @@
         android:layout_alignParentStart="true"
         android:layout_below="@+id/eventIV"
         android:layout_toLeftOf="@+id/eventDateTV"
-        android:text="TextView"
-        android:textSize="16dp"
+        android:textSize="16sp"
         android:textStyle="bold" />
 
-        <TextView
-            android:id="@+id/eventDateTV"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignBaseline="@+id/eventNameTV"
-            android:layout_alignBottom="@+id/eventNameTV"
-            android:layout_toLeftOf="@+id/eventTimeTV"
-            android:layout_toStartOf="@+id/eventTimeTV"
-            android:text="TextView" />
+    <TextView
+        android:id="@+id/eventDateTV"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/eventNameTV"
+        android:layout_alignBottom="@+id/eventNameTV"
+        android:layout_toLeftOf="@+id/eventTimeTV"
+        android:layout_toStartOf="@+id/eventTimeTV" />
 
-        <TextView
-            android:id="@+id/eventTimeTV"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignBaseline="@+id/eventDateTV"
-            android:layout_alignBottom="@+id/eventDateTV"
-            android:layout_alignParentEnd="true"
-            android:layout_alignParentRight="true"
-            android:text="TextView" />
+    <TextView
+        android:id="@+id/eventTimeTV"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/eventDateTV"
+        android:layout_alignBottom="@+id/eventDateTV"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true" />
 
-        <TextView
-            android:id="@+id/eventDescTV"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentStart="true"
-            android:layout_below="@+id/eventNameTV"
-            android:text="TextView" />
+    <TextView
+        android:id="@+id/eventDescTV"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/eventNameTV" />
 
-        <TextView
-            android:id="@+id/eventAddressTV"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
-            android:layout_below="@+id/eventDescTV"
-            android:layout_toLeftOf="@+id/eventDateTV"
-            android:layout_toStartOf="@+id/eventDateTV"
-            android:text="TextView" />
+    <TextView
+        android:id="@+id/eventAddressTV"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_below="@+id/eventDescTV"
+        android:layout_toLeftOf="@+id/eventDateTV"
+        android:layout_toStartOf="@+id/eventDateTV" />
 
-        <fragment
-            android:id="@+id/MapFragment"
-            android:name="com.example.kenneth.examproject.EventMapFragment"
-            android:layout_width="match_parent"
-            android:layout_height="300dp"
-            android:layout_alignParentBottom="true"
-            android:layout_below="@+id/eventAddressTV"
-            android:layout_centerHorizontal="true" />
+    <fragment
+        android:id="@+id/MapFragment"
+        android:name="com.example.kenneth.examproject.EventMapFragment"
+        android:layout_width="match_parent"
+        android:layout_height="300dp"
+        android:layout_alignParentBottom="true"
+        android:layout_below="@+id/eventAddressTV"
+        android:layout_centerHorizontal="true" />
 
     </RelativeLayout>
 </ScrollView>

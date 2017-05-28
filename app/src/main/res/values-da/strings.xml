@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">EventFinder</string>
+    <string name="cityHint">Indtast by her</string>
+    <string name="citySearch">Søg efter by</string>
+    <string name="dayTitle">I dag</string>
+    <string name="locationSearch">Søg efter lokation</string>
+    <string name="monthTitle">I denne måned</string>
+    <string name="noAddress">Ingen adresse</string>
+    <string name="noDate">Ingen dato</string>
+    <string name="noDesc">Ingen beskrivelse</string>
+    <string name="noName">Intet navn</string>
+    <string name="slider_distance">Afstand</string>
+    <string name="weekTitle">I denne uge</string>
+    <string name="dateDesc">Dato:</string>
+    <string name="noTime">Intet tidspunkt</string>
+    <string name="timeDesc">Tid:</string>
+</resources>

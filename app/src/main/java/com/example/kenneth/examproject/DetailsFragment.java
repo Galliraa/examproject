@@ -2,6 +2,7 @@ package com.example.kenneth.examproject;
 
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.support.v4.app.Fragment;
 import android.content.Context;
 import android.os.Bundle;
@@ -26,6 +27,7 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
@@ -71,7 +73,7 @@ public class DetailsFragment extends Fragment implements OnMapReadyCallback {
 
         mRequestQueue = Volley.newRequestQueue(getContext());
         mImageLoader = new ImageLoader(mRequestQueue, new ImageLoader.ImageCache() {
-            private final LruCache<String, Bitmap> mCache = new LruCache<String, Bitmap>(10);
+            private final LruCache<String, Bitmap> mCache = new LruCache<>(10);
 
             public void putBitmap(String url, Bitmap bitmap) {
                 mCache.put(url, bitmap);
@@ -127,22 +129,23 @@ public class DetailsFragment extends Fragment implements OnMapReadyCallback {
                 descTV.setText(event.getDescrition());
                 eventIV.setImageUrl(event.getEventImage(), mImageLoader);
 
-                if(event.getStartTime() != null) {
-                    dateTV.setText(getString(R.string.dateDesc)+" "+event.getStartTime().substring(5,10)+"   ");
-                    timeTV.setText(getString(R.string.timeDesc)+" "+event.getStartTime().substring(11,16));
-                }
-                else
-                {
-                    dateTV.setText(R.string.noDate);
-                    timeTV.setText(R.string.noTime);
-                }
+
+                    if (event.getStartTime() != null) {
+                        dateTV.setText(getActivity().getResources().getString(R.string.dateDesc) + " " + event.getStartTime().substring(5, 10) + "   ");
+                        timeTV.setText(getString(R.string.timeDesc) + " " + event.getStartTime().substring(11, 16));
+                    } else {
+                        dateTV.setText(R.string.noDate);
+                        timeTV.setText(R.string.noTime);
+                    }
+
 
 
                 eventLattitude = event.getLatitude();
                 eventLongitude = event.getLongitude();
 
                 if (eMap != null) {
-                    eMap.addMarker(new MarkerOptions().position(new LatLng(event.getLatitude(), event.getLongitude())).title(event.getName()));
+                    eMap.clear();
+                    eMap.addMarker(new MarkerOptions().position(new LatLng(event.getLatitude(), event.getLongitude())).title(event.getName()).icon(BitmapDescriptorFactory.fromBitmap(BitmapFactory.decodeResource(getContext().getResources(), R.mipmap.pointer))));
                     eMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
                             new LatLng(event.getLatitude(), event.getLongitude()), 12));
                 }
@@ -177,11 +180,6 @@ public class DetailsFragment extends Fragment implements OnMapReadyCallback {
     @Override
     public void onMapReady(GoogleMap googleMap) {
         eMap = googleMap;
-        // Check if we were successful in obtaining the map.
-        if (eMap != null) {
-
-        }
-
     }
 
     public void setUpMap() {

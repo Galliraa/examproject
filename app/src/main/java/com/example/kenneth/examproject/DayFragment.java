@@ -11,6 +11,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.ImageLoader;
@@ -22,6 +23,7 @@ import com.example.kenneth.examproject.Interfaces.ForceUiUpdateInterface;
 import com.example.kenneth.examproject.Models.Event;
 
 import java.lang.reflect.Field;
+import java.security.PrivateKey;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -30,6 +32,8 @@ public class DayFragment extends Fragment implements ForceUiUpdateInterface {
     private ListView eventListView;
     private DayListAdapter dayListAdapter;
     private List<Event> events;
+    private ProgressBar spinner;
+    private boolean searchDone = false;
 
     private EventSelectorInterface eventSelector;
 
@@ -37,8 +41,17 @@ public class DayFragment extends Fragment implements ForceUiUpdateInterface {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View view = inflater.inflate(R.layout.fragment_day, container, false);
-        eventListView = (ListView) view.findViewById(R.id.eventLV);
+
+            View view = inflater.inflate(R.layout.fragment_day, container, false);
+            eventListView = (ListView) view.findViewById(R.id.eventLV);
+            spinner = (ProgressBar) view.findViewById(R.id.progressBarDay);
+
+        if(savedInstanceState != null) {
+            searchDone = savedInstanceState.getBoolean("searchState");
+            if(searchDone)
+                spinner.setVisibility(View.GONE);
+        }
+
         return view;
     }
 
@@ -51,6 +64,7 @@ public class DayFragment extends Fragment implements ForceUiUpdateInterface {
         }
         if (events != null) {
             dayListAdapter = new DayListAdapter(getActivity().getBaseContext(), events);
+
             if (eventListView != null) {
                 eventListView.setAdapter(dayListAdapter);
                 eventListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -69,20 +83,11 @@ public class DayFragment extends Fragment implements ForceUiUpdateInterface {
         super.onResume();
     }
 
-    public void setEvents(ArrayList<Event> eventList){
-        events = (ArrayList<Event>) eventList.clone();
-    }
 
     private void onEventSelected(int position) {
         if(eventSelector !=null) {
             eventSelector.onEventSelected(position);
         }
-    }
-
-
-    public void setEvents(Event event)
-    {
-
     }
 
     @Override
@@ -115,5 +120,17 @@ public class DayFragment extends Fragment implements ForceUiUpdateInterface {
         } catch (IllegalAccessException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public void stopSpinner()
+    {
+        spinner.setVisibility(View.GONE);
+        searchDone = true;
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putBoolean("searchState", searchDone);
     }
 }

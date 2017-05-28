@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
+import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -94,33 +95,7 @@ public class LoginActivity extends AppCompatActivity {
         slider = (SeekBar) findViewById(R.id.seekBar);
         loginButton = (LoginButton) findViewById(R.id.login_button);
 
-        locationListener = new LocationListener() {
-            @Override
-            public void onLocationChanged(Location location) {
-                Intent i = new Intent(getApplicationContext(), MainActivity.class);
-                lat = location.getLatitude();
-                lng = location.getLongitude();
-                setupConnectionToEventService();
-                bindToEventService(lat, lng, distance);
-                startActivityForResult(i, VIEW_REQUEST_CODE);
-            }
 
-            @Override
-            public void onStatusChanged(String s, int i, Bundle bundle) {
-
-            }
-
-            @Override
-            public void onProviderEnabled(String s) {
-
-            }
-
-            @Override
-            public void onProviderDisabled(String s) {
-                Intent i = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-                startActivity(i);
-            }
-        };
 
         // https://developer.android.com/training/volley/requestqueue.html
         // Instantiate the cache
@@ -138,7 +113,6 @@ public class LoginActivity extends AppCompatActivity {
         }
 
 
-
         slider.setProgress(45);
         slider.setMax(90);
         info.setText(getString(R.string.slider_distance) + ": " + distance + " km");
@@ -147,7 +121,7 @@ public class LoginActivity extends AppCompatActivity {
         loginButton.registerCallback(callbackManager, new FacebookCallback<LoginResult>() {
             @Override
             public void onSuccess(LoginResult loginResult) {
-            enableViews();
+                enableViews();
             }
 
             @Override
@@ -160,13 +134,18 @@ public class LoginActivity extends AppCompatActivity {
             }
         });
 
-
+        loginButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                disableViews();
+            }
+        });
 
 
         slider.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                distance = (float) progress/10 + (float) 1;
+                distance = (float) progress / 10 + (float) 1;
                 info.setText(getString(R.string.slider_distance) + ": " + String.valueOf(distance) + " km");
             }
 
@@ -246,8 +225,6 @@ public class LoginActivity extends AppCompatActivity {
                         JSONObject data = response.getJSONArray("results").getJSONObject(0).getJSONObject("geometry").getJSONObject("location");
                         lat = data.getDouble("lat");
                         lng = data.getDouble("lng");
-
-                        info.setText(String.valueOf(lat) + "," + String.valueOf(lng));
                     }
 
                     setupConnectionToEventService();
@@ -284,8 +261,13 @@ public class LoginActivity extends AppCompatActivity {
             // for ActivityCompat#requestPermissions for more details.
             return;
         }
-        locationManager.requestSingleUpdate("gps", locationListener, null);
-
+        Location location = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+        Intent i = new Intent(getApplicationContext(), MainActivity.class);
+        lat = location.getLatitude();
+        lng = location.getLongitude();
+        setupConnectionToEventService();
+        bindToEventService(lat, lng, distance);
+        startActivityForResult(i, VIEW_REQUEST_CODE);
     }
 
     private void enableViews() {
@@ -354,4 +336,3 @@ public class LoginActivity extends AppCompatActivity {
         unbindService(eventServiceConnection);
     }
 }
-

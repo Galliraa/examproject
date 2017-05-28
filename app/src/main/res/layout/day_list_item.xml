@@ -10,7 +10,6 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:srcCompat="@android:drawable/ic_menu_report_image"
-        android:layout_weight="1"
         android:layout_alignParentTop="true"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true" />
@@ -23,8 +22,8 @@
         android:layout_alignParentStart="true"
         android:layout_below="@+id/eventIV"
         android:layout_toLeftOf="@+id/eventDateTV"
-        android:text="TextView"
-        android:textSize="16dp"
+        android:text=""
+        android:textSize="16sp"
         android:textStyle="bold" />
 
     <TextView
@@ -34,14 +33,15 @@
         android:layout_alignParentEnd="true"
         android:layout_alignParentRight="true"
         android:layout_below="@+id/eventIV"
-        android:text="TextView" />
+        android:text="" />
 
     <TextView
         android:id="@+id/eventDescTV"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="TextView"
+        android:text=""
         android:layout_below="@+id/eventNameTV"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true" />
+
 </RelativeLayout>

@@ -9,6 +9,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 
 import com.example.kenneth.examproject.Adapters.MonthListAdapter;
 import com.example.kenneth.examproject.Interfaces.EventSelectorInterface;
@@ -26,6 +27,8 @@ public class MonthFragment extends Fragment implements ForceUiUpdateInterface {
     private ListView eventListView;
     private MonthListAdapter monthListAdapter;
     private List<Event> events;
+    private ProgressBar spinner;
+    private boolean searchDone = false;
 
     private EventSelectorInterface eventSelector;
 
@@ -35,6 +38,14 @@ public class MonthFragment extends Fragment implements ForceUiUpdateInterface {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_month, container, false);
         eventListView = (ListView) view.findViewById(R.id.eventLV);
+        spinner = (ProgressBar)view.findViewById(R.id.progressBarMonth);
+
+        if(savedInstanceState != null) {
+            searchDone = savedInstanceState.getBoolean("searchState");
+            if(searchDone)
+                spinner.setVisibility(View.GONE);
+        }
+
         return view;
     }
 
@@ -66,20 +77,10 @@ public class MonthFragment extends Fragment implements ForceUiUpdateInterface {
         }
     }
 
-    public void setEvents(ArrayList<Event> eventList){
-        events = (ArrayList<Event>) eventList.clone();
-    }
-
     private void onEventSelected(int position) {
         if(eventSelector !=null) {
             eventSelector.onEventSelected(position);
         }
-    }
-
-
-    public void setEvents(Event event)
-    {
-
     }
 
     @Override
@@ -112,5 +113,17 @@ public class MonthFragment extends Fragment implements ForceUiUpdateInterface {
         } catch (IllegalAccessException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public void stopSpinner()
+    {
+        spinner.setVisibility(View.GONE);
+        searchDone = true;
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putBoolean("searchState", searchDone);
     }
 }

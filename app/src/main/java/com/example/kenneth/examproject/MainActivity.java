@@ -104,7 +104,7 @@ public class MainActivity extends AppCompatActivity implements EventSelectorInte
                 list.add(events.get(i));
             }
         }
-        return events;
+        return null;
     }
 
     @Override
@@ -192,8 +192,6 @@ public class MainActivity extends AppCompatActivity implements EventSelectorInte
                 // This method will be invoked when a new page becomes selected.
                 @Override
                 public void onPageSelected(int position) {
-                    Toast.makeText(MainActivity.this,
-                            "Selected page position: " + position, Toast.LENGTH_SHORT).show();
                     Fragment fragment = ((PageAdapter)vpPager.getAdapter()).getFragment(position);
 
                     if (fragment != null)
@@ -340,10 +338,22 @@ public class MainActivity extends AppCompatActivity implements EventSelectorInte
                 if (fragment != null)
                 {
                     ((ForceUiUpdateInterface)fragment).updateEvents();
+                    for (int i = 0; i<3; i++)
+                    {
+                        Fragment fragment1 = ((PageAdapter)vpPager.getAdapter()).getFragment(i);
+                        if (fragment1 != null)
+                            ((ForceUiUpdateInterface)fragment1).stopSpinner();
+                    }
                 }
+
+                if(phoneMode == PhoneMode.LANDSCAPE) {
+                    eventDetails.setEvent(events.get(selectedEventIndex));
+                }
+
+                if(events == null)
+                    Toast.makeText(getBaseContext(), "No new data", Toast.LENGTH_SHORT).show();
             }
-            else
-                Toast.makeText(getBaseContext(), "No new data", Toast.LENGTH_SHORT).show();
+
         }
     };
 
