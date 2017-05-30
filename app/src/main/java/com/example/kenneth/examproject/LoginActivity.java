@@ -95,6 +95,36 @@ public class LoginActivity extends AppCompatActivity {
         slider = (SeekBar) findViewById(R.id.seekBar);
         loginButton = (LoginButton) findViewById(R.id.login_button);
 
+        //https://developer.android.com/guide/topics/location/strategies.html
+        locationListener = new LocationListener() {
+            public void onLocationChanged(Location location) {
+                // Called when a new location is found by the network location provider.
+                if(location != null)
+                {
+                    try
+                    {
+                        lat = location.getLatitude();
+                        lng = location.getLongitude();
+                        locationFound();
+                    }
+                    catch (Exception e)
+                    {
+                        e.printStackTrace();
+                    }
+                }
+            }
+
+            public void onStatusChanged(String provider, int status, Bundle extras) {}
+
+            public void onProviderEnabled(String provider) {}
+
+            public void onProviderDisabled(String provider) {
+                Intent i = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+                startActivity(i);
+            }
+        };
+
+
 
 
         // https://developer.android.com/training/volley/requestqueue.html
@@ -261,13 +291,16 @@ public class LoginActivity extends AppCompatActivity {
             // for ActivityCompat#requestPermissions for more details.
             return;
         }
-        Location location = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
-        Intent i = new Intent(getApplicationContext(), MainActivity.class);
-        lat = location.getLatitude();
-        lng = location.getLongitude();
-        setupConnectionToEventService();
-        bindToEventService(lat, lng, distance);
-        startActivityForResult(i, VIEW_REQUEST_CODE);
+        Location location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+        if(location != null && location.getTime() > (System.currentTimeMillis() - 1800000))
+        {
+            lat = location.getLatitude();
+            lng = location.getLongitude();
+            locationFound();
+        }
+        else
+            locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, locationListener);
+        //locationManager.requestSingleUpdate(LocationManager.GPS_PROVIDER, locationListener, null);
     }
 
     private void enableViews() {
@@ -306,7 +339,7 @@ public class LoginActivity extends AppCompatActivity {
                 // cast its IBinder to a concrete class and directly access it.
                 //ref: http://developer.android.com/reference/android/app/Service.html
                 eventService = ((EventService.EventServiceBinder)service).getService();
-                Log.d("MAIN", "Weather service bound");
+                Log.d("LoginActivity", "service bound");
 
             }
 
@@ -317,7 +350,7 @@ public class LoginActivity extends AppCompatActivity {
                 // see this happen.
                 //ref: http://developer.android.com/reference/android/app/Service.html
                 eventService = null;
-                Log.d("MAIN", "Weather service unbound");
+                Log.d("LoginActivity", "service unbound");
             }
         };
     }
@@ -334,5 +367,14 @@ public class LoginActivity extends AppCompatActivity {
 
     public void unbindFromEventService(){
         unbindService(eventServiceConnection);
+    }
+
+    public void locationFound()
+    {
+        Intent i = new Intent(getApplicationContext(), MainActivity.class);
+        locationManager.removeUpdates(locationListener);
+        setupConnectionToEventService();
+        bindToEventService(lat, lng, distance);
+        startActivityForResult(i, VIEW_REQUEST_CODE);
     }
 }
