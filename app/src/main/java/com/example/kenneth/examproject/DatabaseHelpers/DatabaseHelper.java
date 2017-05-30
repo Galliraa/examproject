@@ -5,24 +5,19 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.graphics.Bitmap;
-
 
 import com.example.kenneth.examproject.Models.Event;
 
-import java.io.ByteArrayOutputStream;
 import java.util.List;
 import java.util.Vector;
 
 import static com.example.kenneth.examproject.Contracts.EventDatabaseContract.DATABASE_NAME;
 import static com.example.kenneth.examproject.Contracts.EventDatabaseContract.DATABASE_VERSION;
 import static com.example.kenneth.examproject.Contracts.EventDatabaseContract.Table1.COLUMN_END_TIME;
-import static com.example.kenneth.examproject.Contracts.EventDatabaseContract.Table1.COLUMN_EVENT_ID;
 import static com.example.kenneth.examproject.Contracts.EventDatabaseContract.Table1.COLUMN_LATITUDE;
 import static com.example.kenneth.examproject.Contracts.EventDatabaseContract.Table1.COLUMN_LONGITUDE;
 import static com.example.kenneth.examproject.Contracts.EventDatabaseContract.Table1.COLUMN_START_TIME;
 import static com.example.kenneth.examproject.Contracts.EventDatabaseContract.Table1.COLUMN_DESC;
-import static com.example.kenneth.examproject.Contracts.EventDatabaseContract.Table1.COLUMN_ID;
 import static com.example.kenneth.examproject.Contracts.EventDatabaseContract.Table1.COLUMN_URL;
 import static com.example.kenneth.examproject.Contracts.EventDatabaseContract.Table1.COLUMN_NAME;
 import static com.example.kenneth.examproject.Contracts.EventDatabaseContract.Table1.COLUMN_ADDRESS;
@@ -30,21 +25,13 @@ import static com.example.kenneth.examproject.Contracts.EventDatabaseContract.Ta
 import static com.example.kenneth.examproject.Contracts.EventDatabaseContract.Table1.DELETE_TABLE;
 import static com.example.kenneth.examproject.Contracts.EventDatabaseContract.Table1.TABLE_NAME;
 
-/**
- * Created by Kenneth on 27-04-2017.
- */
+
 //references to sources
 //http://www.androiddesignpatterns.com/2012/05/correctly-managing-your-sqlite-database.html
-//http://stackoverflow.com/questions/4989182/converting-java-bitmap-to-byte-array
 
 public class DatabaseHelper extends SQLiteOpenHelper {
 
     private static DatabaseHelper sInstance;
-
-    /**
-     * Constructor should be private to prevent direct instantiation.
-     * make call to static method "getInstance()" instead.
-     */
 
     public DatabaseHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -66,17 +53,12 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public void deleteAll()
     {
         SQLiteDatabase db = this.getWritableDatabase();
-        // db.delete(TABLE_NAME,null,null);
         db.execSQL("delete from "+ TABLE_NAME);
-        //db.execSQL("TRUNCATE table" + TABLE_NAME);
         db.close();
     }
 
-    public static synchronized DatabaseHelper getInstance(Context context) {
-
-        // Use the application context, which will ensure that you
-        // don't accidentally leak an Activity's context.
-        // See this article for more information: http://bit.ly/6LRzfx
+    public static synchronized DatabaseHelper getInstance(Context context)
+    {
         if (sInstance == null) {
             sInstance = new DatabaseHelper(context.getApplicationContext());
         }
@@ -94,10 +76,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         values.put(COLUMN_DESC, event.getDescrition());
         values.put(COLUMN_NAME, event.getName());
         values.put(COLUMN_ADDRESS, event.getAddress());
-        values.put(COLUMN_EVENT_ID, event.getId());
         values.put(COLUMN_LONGITUDE, event.getLongitude());
         values.put(COLUMN_LATITUDE, event.getLatitude());
-
 
         SQLiteDatabase db = sInstance.getWritableDatabase();
         db.insert(TABLE_NAME, null, values);
@@ -105,15 +85,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.close();
     }
 
-    //delete row from database
-    public void deleteEventFromDatabase(long eventId){
-        SQLiteDatabase db = sInstance.getWritableDatabase();
-        db.execSQL("DELETE FROM " + TABLE_NAME + " WHERE " + COLUMN_ID + " IN " + "( " + eventId + " )");
-        db.close();
-    }
-
     public List<Event> getAllEvents(){
-        List<Event> events = new Vector<Event>();
+        List<Event> events = new Vector<>();
         SQLiteDatabase db = sInstance.getWritableDatabase();
 
         //cursor point to a location in your results
@@ -125,7 +98,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             if(c.getString(c.getColumnIndex(COLUMN_NAME))!=null)
             {
                 Event temp = new Event();
-                temp.setId(c.getString(c.getColumnIndex(COLUMN_EVENT_ID)));
+
                 temp.setAddress(c.getString(c.getColumnIndex(COLUMN_ADDRESS)));
                 temp.setDescrition(c.getString(c.getColumnIndex(COLUMN_DESC)));
                 temp.setName(c.getString(c.getColumnIndex(COLUMN_NAME)));

@@ -6,7 +6,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
-import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -24,7 +23,6 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.SeekBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.android.volley.Cache;
 import com.android.volley.Network;
@@ -58,21 +56,27 @@ public class LoginActivity extends AppCompatActivity {
 
     private TextView info;
     private EditText cityText;
-    private LoginButton loginButton;
     private Button searchCity;
     private Button searchLocation;
     private LocationListener locationListener;
     private SeekBar slider;
     private float distance = 5;
-
     private EventService eventService;
-
     private KeyListener cityTextKeyListener;
-
     private RequestQueue mRequestQueue;
-
     private double lat;
     private double lng;
+
+    @Override
+    public void onResume(){
+        super.onResume();
+
+    }
+
+    @Override
+    public void onStart(){
+        super.onStart();
+    }
 
 
     @Override
@@ -84,7 +88,6 @@ public class LoginActivity extends AppCompatActivity {
         FacebookSdk.sdkInitialize(getApplicationContext());
         callbackManager = CallbackManager.Factory.create();
 
-
         setContentView(R.layout.activity_login);
 
         searchCity = (Button) findViewById(R.id.cityButton);
@@ -93,7 +96,7 @@ public class LoginActivity extends AppCompatActivity {
         cityTextKeyListener = cityText.getKeyListener();
         info = (TextView) findViewById(R.id.info);
         slider = (SeekBar) findViewById(R.id.seekBar);
-        loginButton = (LoginButton) findViewById(R.id.login_button);
+        LoginButton loginButton = (LoginButton) findViewById(R.id.login_button);
 
         //https://developer.android.com/guide/topics/location/strategies.html
         locationListener = new LocationListener() {
@@ -124,9 +127,6 @@ public class LoginActivity extends AppCompatActivity {
             }
         };
 
-
-
-
         // https://developer.android.com/training/volley/requestqueue.html
         // Instantiate the cache
         Cache cache = new DiskBasedCache(getCacheDir(), 1024 * 1024); // 1MB cap
@@ -137,11 +137,9 @@ public class LoginActivity extends AppCompatActivity {
         // Start the queue
         mRequestQueue.start();
 
-
         if (AccessToken.getCurrentAccessToken() == null) {
             disableViews();
         }
-
 
         slider.setProgress(45);
         slider.setMax(90);
@@ -156,7 +154,6 @@ public class LoginActivity extends AppCompatActivity {
 
             @Override
             public void onCancel() {
-
             }
 
             @Override
@@ -171,7 +168,6 @@ public class LoginActivity extends AppCompatActivity {
             }
         });
 
-
         slider.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
@@ -181,12 +177,10 @@ public class LoginActivity extends AppCompatActivity {
 
             @Override
             public void onStartTrackingTouch(SeekBar seekBar) {
-
             }
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
-
             }
         });
 
@@ -204,7 +198,6 @@ public class LoginActivity extends AppCompatActivity {
             }
         });
 
-
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                 requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.INTERNET}, 10);
@@ -212,11 +205,9 @@ public class LoginActivity extends AppCompatActivity {
             } else {
                 configureSearchLocButton();
             }
-
         } else {
             configureSearchLocButton();
         }
-
     }
 
     @Override
@@ -241,7 +232,6 @@ public class LoginActivity extends AppCompatActivity {
 
     private void searchCityFunc() throws IllegalAccessException, InstantiationException {
         final Intent i = new Intent(this, MainActivity.class);
-        //initiate service to search by city name here....
 
         String url = "https://maps.googleapis.com/maps/api/geocode/json?address=" + cityText.getText();
 
@@ -256,31 +246,25 @@ public class LoginActivity extends AppCompatActivity {
                         lat = data.getDouble("lat");
                         lng = data.getDouble("lng");
                     }
-
                     setupConnectionToEventService();
                     bindToEventService(lat, lng, distance);
-
                     startActivityForResult(i, VIEW_REQUEST_CODE);
                 }
                 catch (JSONException e)
                 {
                     e.printStackTrace();
                 }
-
             }
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-
             }
         });
-
         mRequestQueue.add(jsonObjectRequest);
     }
 
     private void searchLocationFunc() {
 
-        //initiate service to search by current location here...
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             // TODO: Consider calling
             //    ActivityCompat#requestPermissions
@@ -299,8 +283,7 @@ public class LoginActivity extends AppCompatActivity {
             locationFound();
         }
         else
-            locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, locationListener);
-        //locationManager.requestSingleUpdate(LocationManager.GPS_PROVIDER, locationListener, null);
+            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
     }
 
     private void enableViews() {
@@ -325,7 +308,8 @@ public class LoginActivity extends AppCompatActivity {
         if (requestCode == VIEW_REQUEST_CODE) {
             // Make sure the request was successful
             if (resultCode == RESULT_OK) {
-                unbindFromEventService();
+                if (eventServiceConnection != null)
+                    unbindFromEventService();
             }
         }
     }
@@ -340,7 +324,6 @@ public class LoginActivity extends AppCompatActivity {
                 //ref: http://developer.android.com/reference/android/app/Service.html
                 eventService = ((EventService.EventServiceBinder)service).getService();
                 Log.d("LoginActivity", "service bound");
-
             }
 
             public void onServiceDisconnected(ComponentName className) {

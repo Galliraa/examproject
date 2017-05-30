@@ -31,11 +31,11 @@ public class DayListAdapter extends BaseAdapter {
     private ImageLoader mImageLoader;
     private RequestQueue mRequestQueue;
 
-
     public DayListAdapter(Context c, List<Event> taskList){
         events = taskList;
         context = c;
 
+        //https://cypressnorth.com/mobile-application-development/setting-android-google-volley-imageloader-networkimageview/
         mRequestQueue = Volley.newRequestQueue(c);
         mImageLoader = new ImageLoader(mRequestQueue, new ImageLoader.ImageCache() {
             private final LruCache<String, Bitmap> mCache = new LruCache<>(10);
@@ -49,6 +49,7 @@ public class DayListAdapter extends BaseAdapter {
             }
         });
     }
+
     @Override
     public int getCount()
     {
@@ -83,9 +84,6 @@ public class DayListAdapter extends BaseAdapter {
 
         event = events.get(position);
         if(event !=null) {
-
-            //ImageView eventImageView = (ImageView) convertView.findViewById(R.id.eventIV);
-            //eventImageView.setImageBitmap(event.getEventImage());
 
             TextView nameView = (TextView) convertView.findViewById(R.id.eventNameTV);
             if (event.getName() != null)

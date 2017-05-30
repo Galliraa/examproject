@@ -12,10 +12,6 @@ import com.example.kenneth.examproject.R;
 
 import java.util.List;
 
-/**
- * Created by Kenneth on 20-04-2017.
- */
-
 public class WeekListAdapter extends BaseAdapter {
 
     private Context context;
@@ -26,6 +22,7 @@ public class WeekListAdapter extends BaseAdapter {
         events = taskList;
         context = c;
     }
+
     @Override
     public int getCount()
     {
@@ -60,8 +57,6 @@ public class WeekListAdapter extends BaseAdapter {
 
         event = events.get(position);
         if(event !=null) {
-
-            //convertView.setBackgroundColor(Integer.parseInt(event.getStartTime().substring(8,10)+event.getStartTime().substring(8,10)+event.getStartTime().substring(8,10)));
 
             convertView.setBackgroundColor(context.getResources().getIntArray(R.array.list_backgroundcolor)[Integer.parseInt(event.getStartTime().substring(8,10))-1]);
 

@@ -1,11 +1,9 @@
 package com.example.kenneth.examproject;
 
-import android.graphics.Bitmap;
 import android.support.v4.app.Fragment;
 import android.content.Context;
 import android.os.Bundle;
 
-import android.support.v4.util.LruCache;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,18 +11,12 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 
-import com.android.volley.RequestQueue;
-import com.android.volley.toolbox.ImageLoader;
-import com.android.volley.toolbox.Volley;
 import com.example.kenneth.examproject.Adapters.DayListAdapter;
-import com.example.kenneth.examproject.DatabaseHelpers.DatabaseHelper;
 import com.example.kenneth.examproject.Interfaces.EventSelectorInterface;
 import com.example.kenneth.examproject.Interfaces.ForceUiUpdateInterface;
 import com.example.kenneth.examproject.Models.Event;
 
 import java.lang.reflect.Field;
-import java.security.PrivateKey;
-import java.util.ArrayList;
 import java.util.List;
 
 public class DayFragment extends Fragment implements ForceUiUpdateInterface {
@@ -55,8 +47,6 @@ public class DayFragment extends Fragment implements ForceUiUpdateInterface {
         return view;
     }
 
-
-    // in this must be implemented sorting by date
     public void updateEvents(){
         if(eventSelector != null)
         {

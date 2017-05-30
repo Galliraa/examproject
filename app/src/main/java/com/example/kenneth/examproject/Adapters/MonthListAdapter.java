@@ -13,10 +13,6 @@ import com.example.kenneth.examproject.R;
 
 import java.util.List;
 
-/**
- * Created by Kenneth on 20-04-2017.
- */
-
 public class MonthListAdapter extends BaseAdapter {
 
     private Context context;
@@ -27,6 +23,7 @@ public class MonthListAdapter extends BaseAdapter {
         events = taskList;
         context = c;
     }
+
     @Override
     public int getCount()
     {

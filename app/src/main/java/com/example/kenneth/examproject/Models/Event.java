@@ -1,33 +1,15 @@
 package com.example.kenneth.examproject.Models;
 
-import android.graphics.Bitmap;
-
-/**
- * Created by Kenneth on 12-05-2017.
- */
-
 public class Event {
 
-    private String id;
     private String Name;
     private String StartTime;
-
-
-
     private String EndTime;
     private String Descrition;
     private String Address;
     private double Longitude;
     private double Latitude;
     private String EventImage;
-
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
 
     public String getName() {
         return Name;

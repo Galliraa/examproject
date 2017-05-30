@@ -16,18 +16,14 @@ import com.example.kenneth.examproject.Interfaces.ForceUiUpdateInterface;
 import com.example.kenneth.examproject.Models.Event;
 
 import java.lang.reflect.Field;
-import java.util.ArrayList;
 import java.util.List;
 
 public class WeekFragment extends Fragment implements ForceUiUpdateInterface {
 
-
     private GridView eventListView;
-    private WeekListAdapter weekListAdapter;
     private List<Event> events;
     private ProgressBar spinner;
     private boolean searchDone = false;
-
     private EventSelectorInterface eventSelector;
 
     @Override
@@ -43,7 +39,6 @@ public class WeekFragment extends Fragment implements ForceUiUpdateInterface {
             if(searchDone)
                 spinner.setVisibility(View.GONE);
         }
-
         return view;
     }
 
@@ -52,7 +47,6 @@ public class WeekFragment extends Fragment implements ForceUiUpdateInterface {
         super.onResume();
     }
 
-    // in this must be implemented sorting by date
     public void updateEvents(){
         if(eventSelector != null)
         {
@@ -60,14 +54,13 @@ public class WeekFragment extends Fragment implements ForceUiUpdateInterface {
         }
         if (events != null)
         {
-            weekListAdapter = new WeekListAdapter(getActivity().getBaseContext(), events);
+            WeekListAdapter weekListAdapter = new WeekListAdapter(getActivity().getBaseContext(), events);
             eventListView.setAdapter(weekListAdapter);
 
             eventListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 @Override
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                     onEventSelected(position);
-
                 }
             });
         }

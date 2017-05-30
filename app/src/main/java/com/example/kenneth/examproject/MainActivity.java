@@ -7,7 +7,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.res.Configuration;
-import android.net.ConnectivityManager;
 import android.os.IBinder;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentPagerAdapter;
@@ -27,7 +26,6 @@ import com.example.kenneth.examproject.Models.Event;
 import com.example.kenneth.examproject.Services.EventService;
 
 import java.util.Calendar;
-import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Vector;
 
@@ -40,22 +38,18 @@ public class MainActivity extends AppCompatActivity implements EventSelectorInte
     private final static String EVENT_TAG = "EVENT";
     private final static String RESUME_TAG = "ONRESUME";
     private static final String DETAILS_FRAG = "details_fragment";
-
-
     private enum PhoneMode {PORTRAIT, LANDSCAPE}
     private enum UserMode {LIST_VIEW, DETAILS_VIEW}
-
-    FragmentPagerAdapter adapterViewPager;
-
     private EventService eventService;
     private DetailsFragment eventDetails;
     private List<Event> events;
     private PhoneMode phoneMode;
     private UserMode userMode;
     private int selectedEventIndex;
-    private boolean isBound;
     private ViewPager vpPager;
     private LinearLayout detailsContainer;
+
+    FragmentPagerAdapter adapterViewPager;
 
     @Override
     public void onEventSelected(int position) {
@@ -125,7 +119,6 @@ public class MainActivity extends AppCompatActivity implements EventSelectorInte
         return events;
     }
 
-
     @Override
     public Event getCurrentSelection() {
         if(events != null)
@@ -138,9 +131,6 @@ public class MainActivity extends AppCompatActivity implements EventSelectorInte
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_views);
-
-        final ConnectivityManager cm =
-                (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
 
         vpPager = (ViewPager) findViewById(R.id.list_container);
         adapterViewPager = new PageAdapter(getSupportFragmentManager(), getApplicationContext());
@@ -158,7 +148,6 @@ public class MainActivity extends AppCompatActivity implements EventSelectorInte
         if(savedInstanceState == null) {
 
             selectedEventIndex = 0;
-
             eventDetails = new DetailsFragment();
 
             if(userMode == null){
@@ -168,7 +157,6 @@ public class MainActivity extends AppCompatActivity implements EventSelectorInte
             getSupportFragmentManager().beginTransaction()
                     .add(R.id.details_container, eventDetails, DETAILS_FRAG)
                     .commit();
-
         } else {
             //got restarted, probably due to orientation change
             selectedEventIndex = savedInstanceState.getInt("event_position");
@@ -184,8 +172,6 @@ public class MainActivity extends AppCompatActivity implements EventSelectorInte
             }
         }
 
-
-
             // Attach the page change listener inside the activity
             vpPager.addOnPageChangeListener( new ViewPager.OnPageChangeListener() {
 
@@ -200,17 +186,12 @@ public class MainActivity extends AppCompatActivity implements EventSelectorInte
                     }
                 }
 
-                // This method will be invoked when the current page is scrolled
                 @Override
                 public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-                    // Code goes here
                 }
 
-                // Called when the scroll state changes:
-                // SCROLL_STATE_IDLE, SCROLL_STATE_DRAGGING, SCROLL_STATE_SETTLING
                 @Override
                 public void onPageScrollStateChanged(int state) {
-                    // Code goes here
                 }
             });
     }
@@ -252,9 +233,7 @@ public class MainActivity extends AppCompatActivity implements EventSelectorInte
         } else {
             //ignore
         }
-
     }
-
 
     @Override
     protected void onStart() {
@@ -295,14 +274,12 @@ public class MainActivity extends AppCompatActivity implements EventSelectorInte
 
         @Override
         public void onServiceDisconnected(ComponentName name) {
-            isBound = false;
         }
 
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
             EventService.EventServiceBinder eventServiceBinder = (EventService.EventServiceBinder) service;
             eventService = eventServiceBinder.getService();
-            isBound = true;
             events = eventService.getAllEvents();
             Fragment fragment = ((PageAdapter)vpPager.getAdapter()).getFragment(vpPager.getCurrentItem());
             if (fragment != null)
@@ -314,7 +291,6 @@ public class MainActivity extends AppCompatActivity implements EventSelectorInte
             Log.d(EVENT_TAG, "onServiceConnected: got events");
         }
     };
-
 
     public void bindToEventService(){
         bindService(new Intent(MainActivity.this,
@@ -353,8 +329,6 @@ public class MainActivity extends AppCompatActivity implements EventSelectorInte
                 if(events == null)
                     Toast.makeText(getBaseContext(), "No new data", Toast.LENGTH_SHORT).show();
             }
-
         }
     };
-
 }

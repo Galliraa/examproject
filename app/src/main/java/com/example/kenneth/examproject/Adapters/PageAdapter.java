@@ -16,18 +16,13 @@ import com.example.kenneth.examproject.WeekFragment;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * Created by Kenneth on 16-05-2017.
- */
-
 //sources:
 // https://github.com/codepath/android_guides/wiki/ViewPager-with-FragmentPagerAdapter
 
 public class PageAdapter extends FragmentPagerAdapter {
+
     private static int NUM_ITEMS = 3;
-
     private Context context;
-
     private Map<Integer,String> fragmentTags;
     private FragmentManager fm;
 
@@ -35,7 +30,7 @@ public class PageAdapter extends FragmentPagerAdapter {
         super(fragmentManager);
         context = c;
         fm = fragmentManager;
-        fragmentTags = new HashMap<Integer,String>();
+        fragmentTags = new HashMap<>();
     }
 
     @Override
@@ -49,7 +44,6 @@ public class PageAdapter extends FragmentPagerAdapter {
             ForceUiUpdateInterface t = (ForceUiUpdateInterface) f;
             t.updateEvents();
         }
-
         return obj;
     }
 

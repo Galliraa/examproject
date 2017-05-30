@@ -11,10 +11,6 @@ import android.widget.FrameLayout;
 
 import com.google.android.gms.maps.SupportMapFragment;
 
-/**
- * Created by Kristian on 23-May-17.
- */
-
 //https://stackoverflow.com/questions/15013535/how-to-make-a-scrollable-fragment-based-on-the-default-android-pageview
 
 public class EventMapFragment extends SupportMapFragment {
@@ -39,7 +35,7 @@ public class EventMapFragment extends SupportMapFragment {
     }
 
     public interface OnTouchListener {
-        public abstract void onTouch();
+        void onTouch();
     }
 
     public class TouchableWrapper extends FrameLayout {

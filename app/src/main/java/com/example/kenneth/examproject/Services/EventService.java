@@ -1,28 +1,19 @@
 package com.example.kenneth.examproject.Services;
 
-import android.annotation.TargetApi;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Bitmap;
 import android.os.AsyncTask;
 import android.os.Binder;
-import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
 import android.os.IBinder;
-import android.support.annotation.RequiresApi;
 import android.support.v4.content.LocalBroadcastManager;
 import android.text.TextUtils;
 import android.util.Log;
 
-import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.toolbox.ImageLoader;
-import com.android.volley.toolbox.ImageRequest;
-import com.android.volley.toolbox.Volley;
 import com.example.kenneth.examproject.DatabaseHelpers.DatabaseHelper;
 import com.example.kenneth.examproject.Models.Event;
+
 import com.facebook.AccessToken;
 import com.facebook.GraphRequest;
 import com.facebook.GraphResponse;
@@ -32,12 +23,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.lang.annotation.Target;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.Vector;
 
 public class EventService extends Service {
@@ -45,8 +32,6 @@ public class EventService extends Service {
     public static final String EVENT_UPDATED_EVENT = "EventUpdated-event";
     public static final String GET_EVENT_TASK_RESULT = "GetEventTaskResult";
     private final static String EVENTSERVICE_TAG = "EVENT SERVICE";
-    private final static int INTERVAL = 1000 * 60 * 30;
-    private final static int TEST_INTERVAL = 10000;
     private double latitude;
     private double longitude;
     private float distance;
@@ -55,9 +40,6 @@ public class EventService extends Service {
     public List<Event> events;
 
     public DatabaseHelper database;
-
-    private Timer timer;
-
 
     public class EventServiceBinder extends Binder {
 
@@ -91,7 +73,7 @@ public class EventService extends Service {
 
         database = DatabaseHelper.getInstance(this);
 
-                scheduleEventTask();
+                runEventTask();
                 Log.d(EVENTSERVICE_TAG, "onStartCommand: Service Started");
                 events = new Vector<>();
     }
@@ -99,7 +81,6 @@ public class EventService extends Service {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        timer.cancel();
         Log.d(EVENTSERVICE_TAG, "onDestroy: Service Stopped");
     }
 
@@ -107,34 +88,20 @@ public class EventService extends Service {
         return events;
     }
 
-    // http://stackoverflow.com/questions/6531950/how-to-execute-async-task-repeatedly-after-fixed-time-intervals
-    private void scheduleEventTask() {
-        final Handler handler = new Handler();
-        timer = new Timer();
-        TimerTask doAsynchronousTask = new TimerTask() {
-            @Override
-            public void run() {
-                handler.post(new Runnable() {
-                    public void run() {
-                        try {
-                            database.deleteAll();
-                            getEventTask task = new getEventTask(getBaseContext(), database);
-                            task.execute();
+    private void runEventTask() {
+        try {
+            database.deleteAll();
+            getEventTask task = new getEventTask(getBaseContext(), database);
+            task.execute();
 
-                        } catch (Exception e) {
-                            // TODO Auto-generated catch block
-                        }
-                    }
-                });
-            }
-        };
-        timer.schedule(doAsynchronousTask, 0, INTERVAL);
+        } catch (Exception e) {
+            // TODO Auto-generated catch block
+        }
     }
 
     private class getEventTask extends AsyncTask<Void,Void,Void> {
 
         private static final String GET_EVENT_TASK_TAG = "GetEventTask";
-        private static final String City = "Aarhus";
 
         private boolean doNext = false;
         private String after;
@@ -142,7 +109,6 @@ public class EventService extends Service {
 
         private DatabaseHelper _database;
         private Context _context;
-        private JSONObject data = null;
 
         private List<String> IDList = new ArrayList<>();
         private List <String> eventIDs = new ArrayList <>();
@@ -207,7 +173,6 @@ public class EventService extends Service {
             params.putString("center", String.valueOf(latitude) + "," + String.valueOf(longitude)); //(center, latitude, longitude)
             params.putString("distance", String.valueOf((int)distance*1000));
             params.putString("limit", "100");
-
 
             new GraphRequest(
                     AccessToken.getCurrentAccessToken(),
@@ -277,7 +242,6 @@ public class EventService extends Service {
                                                 }
                                             }
                                         }
-
                                     } catch (JSONException e) {
                                         e.printStackTrace();
                                     }
@@ -292,9 +256,7 @@ public class EventService extends Service {
         private void getEventIDs()
         {
             final Long unixStartime = System.currentTimeMillis() / 1000L;
-            final Long unixEndtime = unixStartime + 2592000;
-
-
+            final Long unixEndtime = unixStartime + 2592000; // add 30 days unix time
 
             for(int f = 0; f < ((IDList.size()+49)/50); f++) {
 
@@ -306,11 +268,9 @@ public class EventService extends Service {
 
                 final List<String> location50IDs = IDList.subList(f * 50, ((f + 1) * 50-j));
 
-
                 final Bundle params = new Bundle(2);
                 params.putString("ids", TextUtils.join(",", location50IDs));
                 params.putString("fields", "events.fields(name,id,cover).since(" + unixStartime + ").until(" + unixEndtime + ")");
-
 
                 new GraphRequest(
                         AccessToken.getCurrentAccessToken(),
@@ -337,10 +297,7 @@ public class EventService extends Service {
                                                 }
                                             }
                                         }
-
                                         Log.d("onCompleted", "got event IDs");
-
-
                                     } catch (JSONException e) {
                                         e.printStackTrace();
                                     }

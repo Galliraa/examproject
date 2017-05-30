@@ -1,6 +1,5 @@
 package com.example.kenneth.examproject;
 
-import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.support.v4.app.Fragment;
@@ -12,7 +11,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.ScrollView;
 import android.widget.TextView;
 
@@ -21,11 +19,9 @@ import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.NetworkImageView;
 import com.android.volley.toolbox.Volley;
 import com.example.kenneth.examproject.Interfaces.EventSelectorInterface;
-import com.example.kenneth.examproject.Interfaces.ForceUiUpdateInterface;
 import com.example.kenneth.examproject.Models.Event;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
@@ -33,9 +29,6 @@ import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.lang.reflect.Field;
 
-/**
-
- */
 public class DetailsFragment extends Fragment implements OnMapReadyCallback {
 
     private TextView nameTV;
@@ -45,11 +38,8 @@ public class DetailsFragment extends Fragment implements OnMapReadyCallback {
     private TextView descTV;
     private NetworkImageView eventIV;
     private ImageLoader mImageLoader;
-    private RequestQueue mRequestQueue;
     private ScrollView scrollView;
 
-    private double eventLattitude;
-    private double eventLongitude;
 
     private GoogleMap eMap;
 
@@ -71,7 +61,7 @@ public class DetailsFragment extends Fragment implements OnMapReadyCallback {
         descTV = (TextView) view.findViewById(R.id.eventDescTV);
         eventIV = (NetworkImageView) view.findViewById(R.id.eventIV);
 
-        mRequestQueue = Volley.newRequestQueue(getContext());
+        RequestQueue mRequestQueue = Volley.newRequestQueue(getContext());
         mImageLoader = new ImageLoader(mRequestQueue, new ImageLoader.ImageCache() {
             private final LruCache<String, Bitmap> mCache = new LruCache<>(10);
 
@@ -91,8 +81,6 @@ public class DetailsFragment extends Fragment implements OnMapReadyCallback {
 
         return view;
     }
-
-
 
     @Override
     public void onAttach(Context context) {
@@ -137,11 +125,6 @@ public class DetailsFragment extends Fragment implements OnMapReadyCallback {
                         dateTV.setText(R.string.noDate);
                         timeTV.setText(R.string.noTime);
                     }
-
-
-
-                eventLattitude = event.getLatitude();
-                eventLongitude = event.getLongitude();
 
                 if (eMap != null) {
                     eMap.clear();
@@ -192,7 +175,6 @@ public class DetailsFragment extends Fragment implements OnMapReadyCallback {
                     scrollView.requestDisallowInterceptTouchEvent(true);
                 }
             });
-
         }
     }
 }

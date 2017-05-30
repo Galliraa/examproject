@@ -17,19 +17,16 @@ import com.example.kenneth.examproject.Interfaces.ForceUiUpdateInterface;
 import com.example.kenneth.examproject.Models.Event;
 
 import java.lang.reflect.Field;
-import java.util.ArrayList;
 import java.util.List;
 
 public class MonthFragment extends Fragment implements ForceUiUpdateInterface {
 
     private final static String MONTH_TAG = "ONRESUME MONTH";
-
     private ListView eventListView;
     private MonthListAdapter monthListAdapter;
     private List<Event> events;
     private ProgressBar spinner;
     private boolean searchDone = false;
-
     private EventSelectorInterface eventSelector;
 
     @Override
@@ -45,10 +42,8 @@ public class MonthFragment extends Fragment implements ForceUiUpdateInterface {
             if(searchDone)
                 spinner.setVisibility(View.GONE);
         }
-
         return view;
     }
-
 
     @Override
     public void onResume() {
@@ -56,7 +51,6 @@ public class MonthFragment extends Fragment implements ForceUiUpdateInterface {
         Log.d(MONTH_TAG, "onResmue Month: update");
     }
 
-    // in this must be implemented sorting by date
     public void updateEvents(){
         if(eventSelector != null)
         {
@@ -71,7 +65,6 @@ public class MonthFragment extends Fragment implements ForceUiUpdateInterface {
                 @Override
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                     onEventSelected(position);
-
                 }
             });
         }
