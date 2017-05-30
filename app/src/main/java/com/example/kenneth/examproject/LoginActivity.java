@@ -68,18 +68,6 @@ public class LoginActivity extends AppCompatActivity {
     private double lng;
 
     @Override
-    public void onResume(){
-        super.onResume();
-
-    }
-
-    @Override
-    public void onStart(){
-        super.onStart();
-    }
-
-
-    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
@@ -359,5 +347,13 @@ public class LoginActivity extends AppCompatActivity {
         setupConnectionToEventService();
         bindToEventService(lat, lng, distance);
         startActivityForResult(i, VIEW_REQUEST_CODE);
+    }
+
+    @Override
+    public void onDestroy()
+    {
+        super.onDestroy();
+        if (eventServiceConnection != null)
+            unbindFromEventService();
     }
 }
